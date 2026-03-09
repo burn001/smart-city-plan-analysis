@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>도시 유형별 서비스 분야 프로필</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Pretendard','Noto Sans KR',sans-serif; background:#0f172a; color:#e2e8f0; padding:24px; }
+  h1 { font-size:22px; font-weight:700; color:#fff; margin-bottom:6px; text-align:center; }
+  .subtitle { font-size:13px; color:#94a3b8; margin-bottom:24px; text-align:center; }
+  .grid {
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap:20px;
+    max-width:1400px;
+    margin:0 auto;
+  }
+  .card {
+    background:#1e293b;
+    border-radius:12px;
+    padding:20px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.3);
+  }
+  .card-title {
+    font-size:16px;
+    font-weight:700;
+    text-align:center;
+    margin-bottom:4px;
+  }
+  .card-sub {
+    font-size:11px;
+    color:#94a3b8;
+    text-align:center;
+    margin-bottom:12px;
+  }
+  .chart-container {
+    position:relative;
+    width:100%;
+    height:280px;
+  }
+  .summary {
+    max-width:1400px;
+    margin:24px auto 0;
+    background:#1e293b;
+    border-radius:12px;
+    padding:20px;
+  }
+  .summary h3 { font-size:15px; color:#63b3ed; margin-bottom:10px; }
+  .summary table { width:100%; border-collapse:collapse; font-size:12px; }
+  .summary th { background:#0f172a; padding:8px; text-align:center; color:#94a3b8; }
+  .summary td { padding:8px; text-align:center; border-bottom:1px solid #334155; }
+  .summary td:first-child { text-align:left; font-weight:600; }
+</style>
+</head>
+<body>
+<h1>도시 유형별 서비스 분야 프로필</h1>
+<p class="subtitle">각 유형의 평균 서비스 수를 9개 분야 축으로 비교 | 동일 스케일 적용</p>
+<div class="grid" id="grid"></div>
+
+<div class="summary">
+  <h3>유형별 분야 평균 서비스 수 (상세)</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>유형</th>
+        <th>도시수</th>
+        <th>행정</th>
+        <th>교통</th>
+        <th>보건복지</th>
+        <th>환경에너지</th>
+        <th>방범방재</th>
+        <th>시설물</th>
+        <th>교육</th>
+        <th>문화관광</th>
+        <th>근로고용</th>
+      </tr>
+    </thead>
+    <tbody id="summaryBody"></tbody>
+  </table>
+</div>
+
+<script>
+const labels = ["행정", "교통", "보건복지", "환경에너지", "방범방재", "시설물", "교육", "문화관광", "근로고용"];
+const charts = [{"label": "광역", "count": 2, "data": [21.5, 8.0, 2.5, 11.0, 9.5, 0.0, 0.5, 10.5, 10.0], "bgColor": "rgba(239,68,68,0.2)", "borderColor": "rgba(239,68,68,0.8)"}, {"label": "대도시", "count": 6, "data": [13.3, 9.0, 5.0, 5.5, 4.7, 2.8, 0.8, 2.0, 2.2], "bgColor": "rgba(245,158,11,0.2)", "borderColor": "rgba(245,158,11,0.8)"}, {"label": "중소도시", "count": 9, "data": [2.3, 4.4, 1.8, 3.2, 2.8, 0.7, 0.4, 2.8, 1.4], "bgColor": "rgba(59,130,246,0.2)", "borderColor": "rgba(59,130,246,0.8)"}, {"label": "소도시", "count": 11, "data": [2.4, 5.0, 1.7, 2.3, 2.3, 0.5, 0.5, 2.0, 1.7], "bgColor": "rgba(16,185,129,0.2)", "borderColor": "rgba(16,185,129,0.8)"}, {"label": "농어촌", "count": 9, "data": [2.0, 3.3, 2.2, 1.7, 1.4, 0.9, 0.7, 2.2, 1.9], "bgColor": "rgba(139,92,246,0.2)", "borderColor": "rgba(139,92,246,0.8)"}];
+const sugMax = 23;
+
+const grid = document.getElementById('grid');
+const summaryBody = document.getElementById('summaryBody');
+
+charts.forEach((c, idx) => {
+  // Card
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = '<div class="card-title" style="color:' + c.borderColor + '">' + c.label + '</div>' +
+    '<div class="card-sub">' + c.count + '개 도시 평균</div>' +
+    '<div class="chart-container"><canvas id="chart' + idx + '"></canvas></div>';
+  grid.appendChild(card);
+
+  // Chart
+  new Chart(document.getElementById('chart' + idx), {
+    type: 'radar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: c.label,
+        data: c.data,
+        backgroundColor: c.bgColor,
+        borderColor: c.borderColor,
+        borderWidth: 2,
+        pointBackgroundColor: c.borderColor,
+        pointRadius: 3,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) { return ctx.label + ': ' + ctx.parsed.r + '건'; }
+          }
+        }
+      },
+      scales: {
+        r: {
+          beginAtZero: true,
+          max: sugMax,
+          ticks: {
+            stepSize: Math.ceil(sugMax / 5),
+            color: '#64748b',
+            backdropColor: 'transparent',
+            font: { size: 10 }
+          },
+          grid: { color: 'rgba(148,163,184,0.15)' },
+          angleLines: { color: 'rgba(148,163,184,0.15)' },
+          pointLabels: { color: '#94a3b8', font: { size: 11 } }
+        }
+      }
+    }
+  });
+
+  // Summary row
+  let tr = '<tr><td style="color:' + c.borderColor + '">' + c.label + '</td><td>' + c.count + '</td>';
+  c.data.forEach(v => { tr += '<td>' + v + '</td>'; });
+  tr += '</tr>';
+  summaryBody.innerHTML += tr;
+});
+</script>
+</body>
+</html>

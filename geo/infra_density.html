@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>스마트 인프라 밀도 (인구 1만명당)</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Pretendard','Noto Sans KR',sans-serif; background:#0f172a; color:#e2e8f0; padding:24px; }
+  h1 { font-size:22px; font-weight:700; color:#fff; margin-bottom:6px; }
+  .subtitle { font-size:13px; color:#94a3b8; margin-bottom:20px; }
+  .table-wrap { overflow-x:auto; border-radius:12px; box-shadow:0 4px 20px rgba(0,0,0,0.3); }
+  table { border-collapse:collapse; width:100%; min-width:1100px; font-size:13px; }
+  thead th {
+    background:#1e293b; color:#94a3b8; padding:12px 8px; text-align:center;
+    font-weight:600; font-size:11px; cursor:pointer; user-select:none;
+    border-bottom:2px solid #334155; position:sticky; top:0; z-index:10;
+  }
+  thead th:hover { color:#63b3ed; }
+  thead th .sa { font-size:10px; margin-left:3px; }
+  tbody td { padding:10px 8px; text-align:center; border-bottom:1px solid #1e293b; }
+  tbody td:first-child { text-align:left; font-weight:600; color:#fff; padding-left:14px; }
+  tbody tr:hover { background:rgba(99,179,237,0.08); }
+  .total-row td { background:#1e293b!important; font-weight:700; color:#63b3ed; border-top:2px solid #334155; }
+  .cv { font-size:12px; }
+  .cr { font-size:10px; color:#64748b; display:block; }
+  .note { font-size:11px; color:#64748b; margin-top:12px; }
+</style>
+</head>
+<body>
+<h1>스마트 인프라 밀도 (인구 1만명당)</h1>
+<p class="subtitle">37개 지자체 스마트도시 인프라 설치 현황 | 밀도 = 설치수 / (인구/10,000) | 셀 색상이 진할수록 밀도 높음 | 헤더 클릭으로 정렬</p>
+<div class="table-wrap">
+<table id="infraTable">
+<thead>
+<tr>
+  <th data-col="city" data-type="str">지자체 <span class="sa"></span></th>
+  <th data-col="pop" data-type="num">인구 <span class="sa"></span></th>
+  <th data-col="d_smart_crosswalk" data-type="num">스마트<br>횡단보도 <span class="sa"></span></th>
+  <th data-col="d_smart_pole" data-type="num">스마트폴 <span class="sa"></span></th>
+  <th data-col="d_cctv" data-type="num">CCTV <span class="sa"></span></th>
+  <th data-col="d_bus_stop" data-type="num">버스<br>정류장 <span class="sa"></span></th>
+  <th data-col="d_iot_sensor" data-type="num">IoT<br>센서 <span class="sa"></span></th>
+  <th data-col="d_ev_charger" data-type="num">전기차<br>충전 <span class="sa"></span></th>
+  <th data-col="d_robot" data-type="num">로봇/<br>키오스크 <span class="sa"></span></th>
+  <th data-col="d_other_infra" data-type="num">기타<br>인프라 <span class="sa"></span></th>
+  <th data-col="d_total_infra" data-type="num">합계 <span class="sa"></span></th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+<tfoot>
+<tr class="total-row">
+  <td>전체 평균</td>
+  <td>12,871,000</td>
+  <td>0.48</td>
+  <td>3.10</td>
+  <td>44.93</td>
+  <td>4.42</td>
+  <td>13.42</td>
+  <td>5.59</td>
+  <td>1.34</td>
+  <td>40.61</td>
+  <td>113.89</td>
+</tr>
+</tfoot>
+</table>
+</div>
+<p class="note">* 인증 5개 도시(대구, 수원, 안양, 부천, 화성)와 여수·진주는 원본 PDF에서 인프라 수량 직접 추출 (v3)</p>
+<p class="note">* 산청군(2건, 소프트웨어 플랫폼만)은 물리적 인프라 0건이 정상</p>
+
+<script>
+const data = [
+  {"city": "거제시", "pop": 240000, "smart_crosswalk": 13, "d_smart_crosswalk": 0.54, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 127, "d_cctv": 5.29, "bus_stop": 4, "d_bus_stop": 0.17, "iot_sensor": 6, "d_iot_sensor": 0.25, "ev_charger": 6989, "d_ev_charger": 291.21, "robot": 2, "d_robot": 0.08, "other_infra": 668, "d_other_infra": 27.83, "total_infra": 7809, "d_total_infra": 325.38},
+  {"city": "경산시", "pop": 270000, "smart_crosswalk": 0, "d_smart_crosswalk": 0.0, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 0, "d_cctv": 0.0, "bus_stop": 12, "d_bus_stop": 0.44, "iot_sensor": 13, "d_iot_sensor": 0.48, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 752, "d_other_infra": 27.85, "total_infra": 777, "d_total_infra": 28.78},
+  {"city": "경주시", "pop": 250000, "smart_crosswalk": 68, "d_smart_crosswalk": 2.72, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 2, "d_cctv": 0.08, "bus_stop": 16, "d_bus_stop": 0.64, "iot_sensor": 275, "d_iot_sensor": 11.0, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 8, "d_robot": 0.32, "other_infra": 530, "d_other_infra": 21.2, "total_infra": 899, "d_total_infra": 35.96},
+  {"city": "계룡시", "pop": 44000, "smart_crosswalk": 0, "d_smart_crosswalk": 0.0, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 1, "d_cctv": 0.23, "bus_stop": 4, "d_bus_stop": 0.91, "iot_sensor": 0, "d_iot_sensor": 0.0, "ev_charger": 204, "d_ev_charger": 46.36, "robot": 35, "d_robot": 7.95, "other_infra": 59, "d_other_infra": 13.41, "total_infra": 303, "d_total_infra": 68.86},
+  {"city": "고령군", "pop": 32000, "smart_crosswalk": 59, "d_smart_crosswalk": 18.44, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 0, "d_cctv": 0.0, "bus_stop": 0, "d_bus_stop": 0.0, "iot_sensor": 0, "d_iot_sensor": 0.0, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 59, "d_other_infra": 18.44, "total_infra": 118, "d_total_infra": 36.88},
+  {"city": "공주시", "pop": 100000, "smart_crosswalk": 0, "d_smart_crosswalk": 0.0, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 313, "d_cctv": 31.3, "bus_stop": 0, "d_bus_stop": 0.0, "iot_sensor": 0, "d_iot_sensor": 0.0, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 60, "d_other_infra": 6.0, "total_infra": 373, "d_total_infra": 37.3},
+  {"city": "과천시", "pop": 72000, "smart_crosswalk": 0, "d_smart_crosswalk": 0.0, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 0, "d_cctv": 0.0, "bus_stop": 0, "d_bus_stop": 0.0, "iot_sensor": 220, "d_iot_sensor": 30.56, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 0, "d_other_infra": 0.0, "total_infra": 220, "d_total_infra": 30.56},
+  {"city": "광양시", "pop": 150000, "smart_crosswalk": 0, "d_smart_crosswalk": 0.0, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 0, "d_cctv": 0.0, "bus_stop": 0, "d_bus_stop": 0.0, "iot_sensor": 0, "d_iot_sensor": 0.0, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 37, "d_other_infra": 2.47, "total_infra": 37, "d_total_infra": 2.47},
+  {"city": "구리시", "pop": 200000, "smart_crosswalk": 0, "d_smart_crosswalk": 0.0, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 215, "d_cctv": 10.75, "bus_stop": 0, "d_bus_stop": 0.0, "iot_sensor": 0, "d_iot_sensor": 0.0, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 0, "d_other_infra": 0.0, "total_infra": 215, "d_total_infra": 10.75},
+  {"city": "구미시", "pop": 410000, "smart_crosswalk": 72, "d_smart_crosswalk": 1.76, "smart_pole": 8, "d_smart_pole": 0.2, "cctv": 0, "d_cctv": 0.0, "bus_stop": 24, "d_bus_stop": 0.59, "iot_sensor": 0, "d_iot_sensor": 0.0, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 122, "d_other_infra": 2.98, "total_infra": 226, "d_total_infra": 5.51},
+  {"city": "군포시", "pop": 270000, "smart_crosswalk": 34, "d_smart_crosswalk": 1.26, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 29, "d_cctv": 1.07, "bus_stop": 25, "d_bus_stop": 0.93, "iot_sensor": 400, "d_iot_sensor": 14.81, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 71, "d_other_infra": 2.63, "total_infra": 559, "d_total_infra": 20.7},
+  {"city": "남원시", "pop": 78000, "smart_crosswalk": 3, "d_smart_crosswalk": 0.38, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 106, "d_cctv": 13.59, "bus_stop": 4, "d_bus_stop": 0.51, "iot_sensor": 0, "d_iot_sensor": 0.0, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 3, "d_other_infra": 0.38, "total_infra": 116, "d_total_infra": 14.87},
+  {"city": "대구광역시", "pop": 2380000, "smart_crosswalk": 250, "d_smart_crosswalk": 1.05, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 16317, "d_cctv": 68.56, "bus_stop": 1577, "d_bus_stop": 6.63, "iot_sensor": 210, "d_iot_sensor": 0.88, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 18298, "d_other_infra": 76.88, "total_infra": 36652, "d_total_infra": 154.0},
+  {"city": "부천시", "pop": 820000, "smart_crosswalk": 0, "d_smart_crosswalk": 0.0, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 1, "d_cctv": 0.01, "bus_stop": 0, "d_bus_stop": 0.0, "iot_sensor": 369, "d_iot_sensor": 4.5, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 34, "d_robot": 0.41, "other_infra": 279, "d_other_infra": 3.4, "total_infra": 683, "d_total_infra": 8.33},
+  {"city": "사천시", "pop": 110000, "smart_crosswalk": 5, "d_smart_crosswalk": 0.45, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 41, "d_cctv": 3.73, "bus_stop": 20, "d_bus_stop": 1.82, "iot_sensor": 0, "d_iot_sensor": 0.0, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 51, "d_other_infra": 4.64, "total_infra": 117, "d_total_infra": 10.64},
+  {"city": "산청군", "pop": 33000, "smart_crosswalk": 0, "d_smart_crosswalk": 0.0, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 0, "d_cctv": 0.0, "bus_stop": 0, "d_bus_stop": 0.0, "iot_sensor": 0, "d_iot_sensor": 0.0, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 0, "d_other_infra": 0.0, "total_infra": 0, "d_total_infra": 0.0},
+  {"city": "상주시", "pop": 95000, "smart_crosswalk": 0, "d_smart_crosswalk": 0.0, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 40, "d_cctv": 4.21, "bus_stop": 0, "d_bus_stop": 0.0, "iot_sensor": 1498, "d_iot_sensor": 157.68, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 98, "d_other_infra": 10.32, "total_infra": 1636, "d_total_infra": 172.21},
+  {"city": "수원시", "pop": 1200000, "smart_crosswalk": 0, "d_smart_crosswalk": 0.0, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 17911, "d_cctv": 149.26, "bus_stop": 1103, "d_bus_stop": 9.19, "iot_sensor": 0, "d_iot_sensor": 0.0, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 11298, "d_other_infra": 94.15, "total_infra": 30312, "d_total_infra": 252.6},
+  {"city": "안양시", "pop": 560000, "smart_crosswalk": 0, "d_smart_crosswalk": 0.0, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 7833, "d_cctv": 139.88, "bus_stop": 457, "d_bus_stop": 8.16, "iot_sensor": 1672, "d_iot_sensor": 29.86, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 4708, "d_other_infra": 84.07, "total_infra": 14670, "d_total_infra": 261.96},
+  {"city": "양평군", "pop": 120000, "smart_crosswalk": 0, "d_smart_crosswalk": 0.0, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 0, "d_cctv": 0.0, "bus_stop": 95, "d_bus_stop": 7.92, "iot_sensor": 0, "d_iot_sensor": 0.0, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 1825, "d_other_infra": 152.08, "total_infra": 1920, "d_total_infra": 160.0},
+  {"city": "여수시", "pop": 280000, "smart_crosswalk": 7, "d_smart_crosswalk": 0.25, "smart_pole": 3552, "d_smart_pole": 126.86, "cctv": 30, "d_cctv": 1.07, "bus_stop": 0, "d_bus_stop": 0.0, "iot_sensor": 7, "d_iot_sensor": 0.25, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 573, "d_other_infra": 20.46, "total_infra": 4169, "d_total_infra": 148.89},
+  {"city": "옥천군", "pop": 50000, "smart_crosswalk": 3, "d_smart_crosswalk": 0.6, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 0, "d_cctv": 0.0, "bus_stop": 12, "d_bus_stop": 2.4, "iot_sensor": 0, "d_iot_sensor": 0.0, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 9, "d_other_infra": 1.8, "total_infra": 24, "d_total_infra": 4.8},
+  {"city": "울산광역시", "pop": 1120000, "smart_crosswalk": 0, "d_smart_crosswalk": 0.0, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 0, "d_cctv": 0.0, "bus_stop": 81, "d_bus_stop": 0.72, "iot_sensor": 0, "d_iot_sensor": 0.0, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 11, "d_other_infra": 0.1, "total_infra": 92, "d_total_infra": 0.82},
+  {"city": "원주시", "pop": 360000, "smart_crosswalk": 0, "d_smart_crosswalk": 0.0, "smart_pole": 436, "d_smart_pole": 12.11, "cctv": 0, "d_cctv": 0.0, "bus_stop": 4, "d_bus_stop": 0.11, "iot_sensor": 4010, "d_iot_sensor": 111.39, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 22, "d_robot": 0.61, "other_infra": 204, "d_other_infra": 5.67, "total_infra": 4676, "d_total_infra": 129.89},
+  {"city": "의왕시", "pop": 160000, "smart_crosswalk": 18, "d_smart_crosswalk": 1.12, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 257, "d_cctv": 16.06, "bus_stop": 0, "d_bus_stop": 0.0, "iot_sensor": 0, "d_iot_sensor": 0.0, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 12, "d_robot": 0.75, "other_infra": 24, "d_other_infra": 1.5, "total_infra": 311, "d_total_infra": 19.44},
+  {"city": "정선군", "pop": 35000, "smart_crosswalk": 0, "d_smart_crosswalk": 0.0, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 16, "d_cctv": 4.57, "bus_stop": 8, "d_bus_stop": 2.29, "iot_sensor": 9, "d_iot_sensor": 2.57, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 55, "d_other_infra": 15.71, "total_infra": 88, "d_total_infra": 25.14},
+  {"city": "제천시", "pop": 130000, "smart_crosswalk": 8, "d_smart_crosswalk": 0.62, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 0, "d_cctv": 0.0, "bus_stop": 0, "d_bus_stop": 0.0, "iot_sensor": 31, "d_iot_sensor": 2.38, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 9, "d_other_infra": 0.69, "total_infra": 48, "d_total_infra": 3.69},
+  {"city": "진주시", "pop": 350000, "smart_crosswalk": 0, "d_smart_crosswalk": 0.0, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 708, "d_cctv": 20.23, "bus_stop": 15, "d_bus_stop": 0.43, "iot_sensor": 538, "d_iot_sensor": 15.37, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 2972, "d_other_infra": 84.91, "total_infra": 4233, "d_total_infra": 120.94},
+  {"city": "청주시", "pop": 850000, "smart_crosswalk": 0, "d_smart_crosswalk": 0.0, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 50, "d_cctv": 0.59, "bus_stop": 10, "d_bus_stop": 0.12, "iot_sensor": 6530, "d_iot_sensor": 76.82, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 184, "d_other_infra": 2.16, "total_infra": 6774, "d_total_infra": 79.69},
+  {"city": "충주시", "pop": 210000, "smart_crosswalk": 0, "d_smart_crosswalk": 0.0, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 51, "d_cctv": 2.43, "bus_stop": 0, "d_bus_stop": 0.0, "iot_sensor": 130, "d_iot_sensor": 6.19, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 100, "d_robot": 4.76, "other_infra": 0, "d_other_infra": 0.0, "total_infra": 281, "d_total_infra": 13.38},
+  {"city": "통영시", "pop": 130000, "smart_crosswalk": 40, "d_smart_crosswalk": 3.08, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 120, "d_cctv": 9.23, "bus_stop": 30, "d_bus_stop": 2.31, "iot_sensor": 0, "d_iot_sensor": 0.0, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 135, "d_robot": 10.38, "other_infra": 27, "d_other_infra": 2.08, "total_infra": 352, "d_total_infra": 27.08},
+  {"city": "평택시", "pop": 580000, "smart_crosswalk": 32, "d_smart_crosswalk": 0.55, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 532, "d_cctv": 9.17, "bus_stop": 133, "d_bus_stop": 2.29, "iot_sensor": 0, "d_iot_sensor": 0.0, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 123, "d_other_infra": 2.12, "total_infra": 820, "d_total_infra": 14.14},
+  {"city": "함안군", "pop": 64000, "smart_crosswalk": 0, "d_smart_crosswalk": 0.0, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 113, "d_cctv": 17.66, "bus_stop": 2, "d_bus_stop": 0.31, "iot_sensor": 0, "d_iot_sensor": 0.0, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 210, "d_other_infra": 32.81, "total_infra": 325, "d_total_infra": 50.78},
+  {"city": "해남군", "pop": 65000, "smart_crosswalk": 3, "d_smart_crosswalk": 0.46, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 0, "d_cctv": 0.0, "bus_stop": 0, "d_bus_stop": 0.0, "iot_sensor": 0, "d_iot_sensor": 0.0, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 1373, "d_robot": 211.23, "other_infra": 93, "d_other_infra": 14.31, "total_infra": 1469, "d_total_infra": 226.0},
+  {"city": "홍천군", "pop": 68000, "smart_crosswalk": 0, "d_smart_crosswalk": 0.0, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 0, "d_cctv": 0.0, "bus_stop": 0, "d_bus_stop": 0.0, "iot_sensor": 0, "d_iot_sensor": 0.0, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 52, "d_other_infra": 7.65, "total_infra": 52, "d_total_infra": 7.65},
+  {"city": "화성시", "pop": 940000, "smart_crosswalk": 0, "d_smart_crosswalk": 0.0, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 13017, "d_cctv": 138.48, "bus_stop": 2053, "d_bus_stop": 21.84, "iot_sensor": 956, "d_iot_sensor": 10.17, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 8779, "d_other_infra": 93.39, "total_infra": 24805, "d_total_infra": 263.88},
+  {"city": "횡성군", "pop": 45000, "smart_crosswalk": 0, "d_smart_crosswalk": 0.0, "smart_pole": 0, "d_smart_pole": 0.0, "cctv": 0, "d_cctv": 0.0, "bus_stop": 0, "d_bus_stop": 0.0, "iot_sensor": 400, "d_iot_sensor": 88.89, "ev_charger": 0, "d_ev_charger": 0.0, "robot": 0, "d_robot": 0.0, "other_infra": 24, "d_other_infra": 5.33, "total_infra": 424, "d_total_infra": 94.22}
+];
+
+const cols = [
+  "d_smart_crosswalk","d_smart_pole","d_cctv","d_bus_stop",
+  "d_iot_sensor","d_ev_charger","d_robot","d_other_infra","d_total_infra"
+];
+const rawCols = [
+  "smart_crosswalk","smart_pole","cctv","bus_stop",
+  "iot_sensor","ev_charger","robot","other_infra","total_infra"
+];
+
+// Compute max density per column for color scaling
+const maxD = {};
+cols.forEach(c => { maxD[c] = Math.max(...data.map(r => r[c])); });
+
+function heatColor(val, max) {
+  if (!val || max === 0) return 'transparent';
+  const ratio = Math.min(val / max, 1);
+  const alpha = (0.08 + ratio * 0.45).toFixed(2);
+  return `rgba(99,179,237,${alpha})`;
+}
+
+function render(rows) {
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  rows.forEach(r => {
+    let tr = document.createElement('tr');
+    // City
+    tr.innerHTML = `<td>${r.city}</td><td>${(r.pop/10000).toFixed(1)}만</td>`;
+    for (let i = 0; i < cols.length; i++) {
+      const dc = cols[i];
+      const rc = rawCols[i];
+      const dv = r[dc];
+      const rv = r[rc];
+      const bg = heatColor(dv, maxD[dc]);
+      tr.innerHTML += `<td style="background:${bg}"><span class="cv">${dv}</span><span class="cr">${rv}${rc==='total_infra'?'건':''}</span></td>`;
+    }
+    tbody.appendChild(tr);
+  });
+}
+
+// Sort
+let sortCol = 'd_total_infra', sortAsc = false;
+function sortData() {
+  const type = document.querySelector(`th[data-col="${sortCol}"]`)?.dataset.type || 'num';
+  data.sort((a, b) => {
+    let va = a[sortCol], vb = b[sortCol];
+    if (type === 'str') return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+    return sortAsc ? va - vb : vb - va;
+  });
+  render(data);
+  // Update sort arrows
+  document.querySelectorAll('thead th .sa').forEach(s => s.textContent = '');
+  const th = document.querySelector(`th[data-col="${sortCol}"]`);
+  if (th) th.querySelector('.sa').textContent = sortAsc ? '▲' : '▼';
+}
+
+document.querySelectorAll('thead th').forEach(th => {
+  th.addEventListener('click', () => {
+    const col = th.dataset.col;
+    if (col === sortCol) sortAsc = !sortAsc;
+    else { sortCol = col; sortAsc = false; }
+    sortData();
+  });
+});
+
+sortData();
+</script>
+</body>
+</html>

@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>지자체 스마트도시계획 분석 대시보드</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f0f4f8; --surface: #ffffff; --surface2: #e2e8f0;
+    --header-bg: #0f2b46; --header-text: #ffffff;
+    --text: #1a202c; --text2: #64748b; --text3: #94a3b8;
+    --accent: #0891b2; --accent2: #06b6d4; --accent-light: #e0f7fa;
+    --green: #10b981; --yellow: #f59e0b; --red: #ef4444;
+    --purple: #8b5cf6; --orange: #f97316; --pink: #ec4899;
+    --border: #e2e8f0; --shadow: 0 1px 3px rgba(0,0,0,0.08);
+    --radius: 12px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Pretendard','Segoe UI',system-ui,-apple-system,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+
+  /* Header */
+  .header { background: linear-gradient(135deg, #0f2b46 0%, #164e63 100%); color:var(--header-text); padding:40px 0 30px; }
+  .header-inner { max-width:1280px; margin:0 auto; padding:0 24px; text-align:center; }
+  .header h1 { font-size:1.8rem; font-weight:800; letter-spacing:-0.02em; margin-bottom:8px; }
+  .header .subtitle { color:#94a3b8; font-size:0.9rem; margin-bottom:24px; }
+  .stat-bar { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+  .stat-pill { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); border-radius:99px; padding:8px 20px; font-size:0.85rem; font-weight:600; display:flex; align-items:center; gap:6px; }
+  .stat-pill .num { color:#38bdf8; }
+
+  /* Container */
+  .container { max-width:1280px; margin:0 auto; padding:24px; }
+
+  /* Section */
+  .section { margin-bottom:32px; }
+  .section-title { font-size:1.15rem; font-weight:700; color:var(--header-bg); margin-bottom:16px; padding-left:12px; border-left:4px solid var(--accent); }
+
+  /* Cards */
+  .card { background:var(--surface); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow); border:1px solid var(--border); }
+  .card-title { font-size:0.85rem; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:16px; }
+
+  /* Grid layouts */
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; }
+  .grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+
+  @media (max-width:900px) {
+    .grid-2, .grid-3 { grid-template-columns:1fr; }
+    .grid-4 { grid-template-columns:1fr 1fr; }
+  }
+
+  /* Stat cards */
+  .mini-stat { text-align:center; padding:20px 16px; }
+  .mini-stat .big { font-size:2rem; font-weight:800; line-height:1.1; }
+  .mini-stat .label { font-size:0.75rem; color:var(--text2); margin-top:4px; }
+  .mini-stat .sub { font-size:0.7rem; color:var(--text3); margin-top:2px; }
+
+  /* Chart container */
+  .chart-wrap { position:relative; width:100%; }
+  .chart-wrap canvas { width:100%!important; }
+
+  /* Table */
+  .data-table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+  .data-table th { text-align:left; padding:10px 12px; font-weight:600; color:var(--text2); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.04em; border-bottom:2px solid var(--border); background:#f8fafc; }
+  .data-table td { padding:10px 12px; border-bottom:1px solid var(--border); }
+  .data-table tr:hover td { background:#f8fafc; }
+  .data-table .num-cell { text-align:right; font-variant-numeric:tabular-nums; }
+
+  /* Tags */
+  .tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:0.7rem; font-weight:600; }
+  .tag-blue { background:#dbeafe; color:#1d4ed8; }
+  .tag-teal { background:#ccfbf1; color:#0d9488; }
+  .tag-purple { background:#ede9fe; color:#7c3aed; }
+
+  /* Progress bar */
+  .prog-bar { height:8px; background:var(--surface2); border-radius:4px; overflow:hidden; }
+  .prog-fill { height:100%; border-radius:4px; transition:width 0.5s ease; }
+
+  /* Geo links */
+  .geo-links { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .geo-link { display:block; padding:20px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); text-decoration:none; color:var(--text); text-align:center; transition:all 0.2s; box-shadow:var(--shadow); }
+  .geo-link:hover { border-color:var(--accent); transform:translateY(-2px); box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+  .geo-link .icon { font-size:2rem; margin-bottom:8px; }
+  .geo-link .name { font-weight:600; font-size:0.9rem; }
+  .geo-link .desc { font-size:0.75rem; color:var(--text2); margin-top:4px; }
+
+  /* Gap vis */
+  .gap-row { display:flex; align-items:center; gap:12px; padding:8px 0; border-bottom:1px solid var(--border); }
+  .gap-row:last-child { border-bottom:none; }
+  .gap-label { width:80px; font-size:0.8rem; font-weight:600; flex-shrink:0; }
+  .gap-bars { flex:1; display:flex; gap:4px; }
+  .gap-bar { height:24px; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:0.7rem; font-weight:700; color:#fff; min-width:30px; }
+  .gap-val { width:50px; text-align:right; font-size:0.8rem; font-weight:700; color:var(--accent); }
+
+  /* Highlights */
+  .highlight-box { background:linear-gradient(135deg,#f0fdfa 0%,#ecfeff 100%); border:1px solid #99f6e4; border-radius:var(--radius); padding:16px 20px; margin-top:12px; }
+  .highlight-box p { font-size:0.82rem; color:#134e4a; margin-bottom:6px; }
+  .highlight-box p:last-child { margin-bottom:0; }
+  .highlight-box strong { color:#0f766e; }
+
+  /* Footer */
+  footer { text-align:center; padding:32px 24px 24px; color:var(--text3); font-size:0.75rem; border-top:1px solid var(--border); margin-top:20px; }
+  footer a { color:var(--accent); text-decoration:none; }
+  footer a:hover { text-decoration:underline; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-inner">
+    <h1>지자체 스마트도시계획 분석 대시보드</h1>
+    <div class="subtitle">AI시티 정책과 연계한 스마트도시서비스 조사 ・ 평가 체계 구축 및 활용방안 연구</div>
+    <div class="stat-bar">
+      <div class="stat-pill"><span class="num">37</span>개 지자체</div>
+      <div class="stat-pill"><span class="num">955</span>건 서비스</div>
+      <div class="stat-pill"><span class="num">169</span>건 AI (17.7%)</div>
+      <div class="stat-pill"><span class="num">31.2%</span> 이행률</div>
+      <div class="stat-pill"><span class="num">1.09</span>점 기술-제도 갭</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- SECTION 1: 전체 현황 -->
+<div class="section">
+  <h2 class="section-title">전체 현황</h2>
+  <div class="grid-4" style="margin-bottom:20px;">
+    <div class="card mini-stat">
+      <div class="big" style="color:var(--accent);">955</div>
+      <div class="label">전체 서비스</div>
+      <div class="sub">이행 624 + 인증 331</div>
+    </div>
+    <div class="card mini-stat">
+      <div class="big" style="color:var(--green);">169</div>
+      <div class="label">AI 서비스</div>
+      <div class="sub">실질 AI 비율 17.7%</div>
+    </div>
+    <div class="card mini-stat">
+      <div class="big" style="color:var(--yellow);">195</div>
+      <div class="label">완료 서비스</div>
+      <div class="sub">이행실적 기준 31.2%</div>
+    </div>
+    <div class="card mini-stat">
+      <div class="big" style="color:var(--purple);">11</div>
+      <div class="label">법정 분야</div>
+      <div class="sub">교통 20.4% 최다</div>
+    </div>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">11개 법정 분야별 서비스 분포</div>
+      <div class="chart-wrap"><canvas id="chartField"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">3대 서비스 유형별 분포</div>
+      <div class="chart-wrap" style="max-width:320px;margin:0 auto;"><canvas id="chartType"></canvas></div>
+      <div class="highlight-box" style="margin-top:16px;">
+        <p><strong>대화행정형</strong> 391건(40.9%): 행정, 교육, 문화관광, 근로고용</p>
+        <p><strong>생명안전형</strong> 329건(34.5%): 보건복지, 환경에너지, 방범방재, 주거</p>
+        <p><strong>물리제어형</strong> 235건(24.6%): 교통, 시설물관리, 물류</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 2: AI 서비스 현황 -->
+<div class="section">
+  <h2 class="section-title">AI 서비스 현황</h2>
+  <div class="grid-2" style="margin-bottom:20px;">
+    <div class="card mini-stat">
+      <div class="big" style="color:var(--accent);">23.1%</div>
+      <div class="label">이행실적 AI 비율</div>
+      <div class="sub">144건 / 624건</div>
+    </div>
+    <div class="card mini-stat">
+      <div class="big" style="color:var(--purple);">7.6%</div>
+      <div class="label">인증 AI 비율</div>
+      <div class="sub">25건 / 331건</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">지자체별 AI 서비스 비율 (상위 15)</div>
+    <div class="chart-wrap"><canvas id="chartAI"></canvas></div>
+  </div>
+</div>
+
+<!-- SECTION 3: 이행률 현황 -->
+<div class="section">
+  <h2 class="section-title">이행률 현황 (이행실적 32개 도시)</h2>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">지자체별 이행 현황</div>
+      <div class="chart-wrap"><canvas id="chartImpl"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">미추진 사유 분포 (220건)</div>
+      <div class="chart-wrap" style="max-width:320px;margin:0 auto;"><canvas id="chartDelay"></canvas></div>
+      <div class="highlight-box" style="margin-top:16px;">
+        <p><strong>D06 사업 재검토/변경</strong>이 37.3%로 최다 - 계획과 현실의 괴리</p>
+        <p><strong>D01 예산 미확보</strong> 20.0% - 재정 제약이 2위</p>
+        <p><strong>D05 대체 서비스</strong> 13.2% - 합리적 서비스 전환 29건</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 4: 4-Ware 성숙도 -->
+<div class="section">
+  <h2 class="section-title">4-Ware 성숙도</h2>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">5개 도시유형별 4-Ware 점수 (4점 만점)</div>
+      <div class="chart-wrap"><canvas id="chartRadar"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">기술(HW/SW) vs 제도(Human/Org) 갭</div>
+      <div style="margin-bottom:16px;">
+        <div class="gap-row">
+          <div class="gap-label">광역</div>
+          <div class="gap-bars">
+            <div class="gap-bar" style="width:81.25%;background:var(--accent);">HW/SW 3.25</div>
+            <div class="gap-bar" style="width:31.25%;background:var(--orange);">1.25</div>
+          </div>
+          <div class="gap-val">-2.00</div>
+        </div>
+        <div class="gap-row">
+          <div class="gap-label">대도시</div>
+          <div class="gap-bars">
+            <div class="gap-bar" style="width:64.5%;background:var(--accent);">HW/SW 2.58</div>
+            <div class="gap-bar" style="width:39.5%;background:var(--orange);">1.58</div>
+          </div>
+          <div class="gap-val">-1.00</div>
+        </div>
+        <div class="gap-row">
+          <div class="gap-label">중소도시</div>
+          <div class="gap-bars">
+            <div class="gap-bar" style="width:69.5%;background:var(--accent);">HW/SW 2.78</div>
+            <div class="gap-bar" style="width:40.25%;background:var(--orange);">1.61</div>
+          </div>
+          <div class="gap-val">-1.17</div>
+        </div>
+        <div class="gap-row">
+          <div class="gap-label">소도시</div>
+          <div class="gap-bars">
+            <div class="gap-bar" style="width:60.25%;background:var(--accent);">HW/SW 2.41</div>
+            <div class="gap-bar" style="width:31.75%;background:var(--orange);">1.27</div>
+          </div>
+          <div class="gap-val">-1.14</div>
+        </div>
+        <div class="gap-row">
+          <div class="gap-label">농어촌</div>
+          <div class="gap-bars">
+            <div class="gap-bar" style="width:58.25%;background:var(--accent);">HW/SW 2.33</div>
+            <div class="gap-bar" style="width:37.5%;background:var(--orange);">1.50</div>
+          </div>
+          <div class="gap-val">-0.83</div>
+        </div>
+      </div>
+      <div class="highlight-box">
+        <p><strong>전 유형에서 기술 > 제도</strong>: 86%(32개 도시)에서 HW/SW가 Human/Org를 상회</p>
+        <p><strong>광역시 갭 최대(2.0점)</strong>: 고도 기술 인프라 보유 but 거버넌스 최하위</p>
+        <p><strong>CAIO/AI 윤리 프레임워크 보유 도시: 0개</strong></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECTION 5: 지리 시각화 -->
+<div class="section">
+  <h2 class="section-title">지리 시각화</h2>
+  <div class="geo-links">
+    <a class="geo-link" href="geo/bubble_map.html" target="_blank">
+      <div class="icon">&#x1F5FA;</div>
+      <div class="name">전국 버블맵</div>
+      <div class="desc">37개 지자체 위치 + 사업규모 + AI비율</div>
+    </a>
+    <a class="geo-link" href="geo/infra_density.html" target="_blank">
+      <div class="icon">&#x1F4CA;</div>
+      <div class="name">인프라 밀도</div>
+      <div class="desc">도시유형별 만명당 인프라 밀도 비교</div>
+    </a>
+    <a class="geo-link" href="geo/radar_by_type.html" target="_blank">
+      <div class="icon">&#x1F578;</div>
+      <div class="name">유형별 레이더</div>
+      <div class="desc">5개 도시유형 4-Ware 레이더 차트</div>
+    </a>
+  </div>
+</div>
+
+<!-- SECTION 6: 규모별 비교 -->
+<div class="section">
+  <h2 class="section-title">규모별 비교 (5개 도시유형)</h2>
+  <div class="card" style="overflow-x:auto;">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>유형</th>
+          <th>도시수</th>
+          <th class="num-cell">평균 사업수</th>
+          <th class="num-cell">AI 비율</th>
+          <th class="num-cell">완료율</th>
+          <th class="num-cell">4-Ware</th>
+          <th class="num-cell">기술-제도 갭</th>
+          <th class="num-cell">만명당 인프라</th>
+          <th class="num-cell">HHI</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="tag tag-teal">광역</span></td>
+          <td>2</td>
+          <td class="num-cell">73.5</td>
+          <td class="num-cell">20.8%</td>
+          <td class="num-cell">41.7%</td>
+          <td class="num-cell">2.25</td>
+          <td class="num-cell" style="color:var(--red);font-weight:700;">2.00</td>
+          <td class="num-cell">0.4</td>
+          <td class="num-cell">0.179</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-blue">대도시</span></td>
+          <td>6</td>
+          <td class="num-cell">46.0</td>
+          <td class="num-cell">14.9%</td>
+          <td class="num-cell">33.5%</td>
+          <td class="num-cell">2.08</td>
+          <td class="num-cell">1.00</td>
+          <td class="num-cell">1.4</td>
+          <td class="num-cell">0.255</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-purple">중소도시</span></td>
+          <td>9</td>
+          <td class="num-cell">20.1</td>
+          <td class="num-cell" style="color:var(--green);font-weight:700;">28.5%</td>
+          <td class="num-cell">26.5%</td>
+          <td class="num-cell">2.20</td>
+          <td class="num-cell">1.17</td>
+          <td class="num-cell">1.5</td>
+          <td class="num-cell">0.187</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-teal">소도시</span></td>
+          <td>11</td>
+          <td class="num-cell">18.5</td>
+          <td class="num-cell">24.9%</td>
+          <td class="num-cell">41.0%</td>
+          <td class="num-cell">1.85</td>
+          <td class="num-cell">1.14</td>
+          <td class="num-cell">3.7</td>
+          <td class="num-cell">0.197</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-blue">농어촌</span></td>
+          <td>9</td>
+          <td class="num-cell">16.3</td>
+          <td class="num-cell" style="color:var(--red);">9.2%</td>
+          <td class="num-cell">40.4%</td>
+          <td class="num-cell">1.92</td>
+          <td class="num-cell" style="color:var(--green);">0.83</td>
+          <td class="num-cell" style="font-weight:700;">6.0</td>
+          <td class="num-cell" style="color:var(--red);">0.344</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="highlight-box" style="margin-top:16px;">
+    <p><strong>AI 역U자형 패턴</strong>: 중소도시(28.5%)가 AI 도입 선도, 광역/대도시는 레거시 서비스 비중으로 희석</p>
+    <p><strong>농어촌 인프라 밀도 역설</strong>: 만명당 6.0개(광역의 15배)이나 AI비율 9.2%, SW 2.22로 활용 역량 최저</p>
+    <p><strong>소도시 양극화</strong>: 완료율 0%(제천시) ~ 87.5%(구리시), 같은 유형 내 극단적 편차</p>
+  </div>
+</div>
+
+<!-- SECTION 7: 도시별 상세 -->
+<div class="section">
+  <h2 class="section-title">도시별 상세 (37개 지자체)</h2>
+  <div class="card">
+    <input type="text" id="citySearch" placeholder="도시명으로 검색..." style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;margin-bottom:16px;">
+    <div id="cityGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
+      <a href="city/거제시.html" class="geo-link" style="padding:14px;"><div class="name">거제시</div><div class="desc">28건 · AI 21.4% · 중소도시</div></a>
+      <a href="city/경산시.html" class="geo-link" style="padding:14px;"><div class="name">경산시</div><div class="desc">18건 · AI 27.8% · 중소도시</div></a>
+      <a href="city/경주시.html" class="geo-link" style="padding:14px;"><div class="name">경주시</div><div class="desc">21건 · AI 14.3% · 중소도시</div></a>
+      <a href="city/계룡시.html" class="geo-link" style="padding:14px;"><div class="name">계룡시</div><div class="desc">14건 · AI 28.6% · 소도시</div></a>
+      <a href="city/고령군.html" class="geo-link" style="padding:14px;"><div class="name">고령군</div><div class="desc">1건 · AI 0% · 농어촌</div></a>
+      <a href="city/공주시.html" class="geo-link" style="padding:14px;"><div class="name">공주시</div><div class="desc">19건 · AI 26.3% · 소도시</div></a>
+      <a href="city/과천시.html" class="geo-link" style="padding:14px;"><div class="name">과천시</div><div class="desc">24건 · AI 4.2% · 소도시</div></a>
+      <a href="city/광양시.html" class="geo-link" style="padding:14px;"><div class="name">광양시</div><div class="desc">14건 · AI 42.9% · 소도시</div></a>
+      <a href="city/구리시.html" class="geo-link" style="padding:14px;"><div class="name">구리시</div><div class="desc">8건 · AI 25.0% · 소도시</div></a>
+      <a href="city/구미시.html" class="geo-link" style="padding:14px;"><div class="name">구미시</div><div class="desc">25건 · AI 16.0% · 중소도시</div></a>
+      <a href="city/군포시.html" class="geo-link" style="padding:14px;"><div class="name">군포시</div><div class="desc">17건 · AI 23.5% · 대도시</div></a>
+      <a href="city/남원시.html" class="geo-link" style="padding:14px;"><div class="name">남원시</div><div class="desc">27건 · AI 37.0% · 소도시</div></a>
+      <a href="city/대구광역시.html" class="geo-link" style="padding:14px;border-color:var(--accent);"><div class="name">대구광역시</div><div class="desc">111건 · AI 2.7% · 광역 · 인증</div></a>
+      <a href="city/부천시.html" class="geo-link" style="padding:14px;border-color:var(--accent);"><div class="name">부천시</div><div class="desc">47건 · AI 21.3% · 대도시 · 인증</div></a>
+      <a href="city/사천시.html" class="geo-link" style="padding:14px;"><div class="name">사천시</div><div class="desc">27건 · AI 18.5% · 소도시</div></a>
+      <a href="city/산청군.html" class="geo-link" style="padding:14px;"><div class="name">산청군</div><div class="desc">2건 · AI 0% · 농어촌</div></a>
+      <a href="city/상주시.html" class="geo-link" style="padding:14px;"><div class="name">상주시</div><div class="desc">22건 · AI 27.3% · 소도시</div></a>
+      <a href="city/수원시.html" class="geo-link" style="padding:14px;border-color:var(--accent);"><div class="name">수원시</div><div class="desc">86건 · AI 9.3% · 대도시 · 인증</div></a>
+      <a href="city/안양시.html" class="geo-link" style="padding:14px;border-color:var(--accent);"><div class="name">안양시</div><div class="desc">48건 · AI 2.1% · 대도시 · 인증</div></a>
+      <a href="city/양평군.html" class="geo-link" style="padding:14px;"><div class="name">양평군</div><div class="desc">22건 · AI 18.2% · 농어촌</div></a>
+      <a href="city/여수시.html" class="geo-link" style="padding:14px;"><div class="name">여수시</div><div class="desc">18건 · AI 55.6% · 중소도시</div></a>
+      <a href="city/옥천군.html" class="geo-link" style="padding:14px;"><div class="name">옥천군</div><div class="desc">28건 · AI 3.6% · 농어촌</div></a>
+      <a href="city/울산광역시.html" class="geo-link" style="padding:14px;"><div class="name">울산광역시</div><div class="desc">36건 · AI 38.9% · 광역</div></a>
+      <a href="city/원주시.html" class="geo-link" style="padding:14px;"><div class="name">원주시</div><div class="desc">15건 · AI 20.0% · 중소도시</div></a>
+      <a href="city/의왕시.html" class="geo-link" style="padding:14px;"><div class="name">의왕시</div><div class="desc">9건 · AI 44.4% · 소도시</div></a>
+      <a href="city/정선군.html" class="geo-link" style="padding:14px;"><div class="name">정선군</div><div class="desc">12건 · AI 16.7% · 농어촌</div></a>
+      <a href="city/제천시.html" class="geo-link" style="padding:14px;"><div class="name">제천시</div><div class="desc">20건 · AI 10.0% · 소도시</div></a>
+      <a href="city/진주시.html" class="geo-link" style="padding:14px;"><div class="name">진주시</div><div class="desc">23건 · AI 21.7% · 중소도시</div></a>
+      <a href="city/청주시.html" class="geo-link" style="padding:14px;"><div class="name">청주시</div><div class="desc">30건 · AI 33.3% · 대도시</div></a>
+      <a href="city/충주시.html" class="geo-link" style="padding:14px;"><div class="name">충주시</div><div class="desc">19건 · AI 36.8% · 소도시</div></a>
+      <a href="city/통영시.html" class="geo-link" style="padding:14px;"><div class="name">통영시</div><div class="desc">17건 · AI 29.4% · 소도시</div></a>
+      <a href="city/평택시.html" class="geo-link" style="padding:14px;"><div class="name">평택시</div><div class="desc">26건 · AI 15.4% · 대도시</div></a>
+      <a href="city/함안군.html" class="geo-link" style="padding:14px;"><div class="name">함안군</div><div class="desc">22건 · AI 9.1% · 농어촌</div></a>
+      <a href="city/해남군.html" class="geo-link" style="padding:14px;"><div class="name">해남군</div><div class="desc">32건 · AI 15.6% · 농어촌</div></a>
+      <a href="city/홍천군.html" class="geo-link" style="padding:14px;"><div class="name">홍천군</div><div class="desc">3건 · AI 0% · 농어촌</div></a>
+      <a href="city/화성시.html" class="geo-link" style="padding:14px;border-color:var(--accent);"><div class="name">화성시</div><div class="desc">39건 · AI 7.7% · 대도시 · 인증</div></a>
+      <a href="city/횡성군.html" class="geo-link" style="padding:14px;"><div class="name">횡성군</div><div class="desc">25건 · AI 20.0% · 농어촌</div></a>
+    </div>
+  </div>
+  <script>
+    document.getElementById('citySearch').addEventListener('input', function() {
+      const q = this.value.toLowerCase();
+      document.querySelectorAll('#cityGrid a').forEach(a => {
+        a.style.display = a.textContent.toLowerCase().includes(q) ? '' : 'none';
+      });
+    });
+  </script>
+</div>
+
+</div><!-- container -->
+
+<!-- FOOTER -->
+<footer>
+  <p>데이터 출처: 37개 지자체 스마트도시계획 이행실적 자료(32개) 및 스마트도시 인증 자료(5개) | 분석 기준일: 2026-03-04</p>
+  <p>AI시티 정책과 연계한 스마트도시서비스 조사·평가 체계 구축 및 활용방안 연구</p>
+  <p style="margin-top:8px;"><a href="phase2_종합분석/implications.md">종합 시사점 보고서 (implications.md)</a></p>
+  <p style="margin-top:4px;">Last updated: 2026-03-04 | Dashboard v2.0</p>
+</footer>
+
+<script>
+// === DATA ===
+const fieldData = {
+  labels: ['교통','행정','환경에너지수자원','방범방재','문화관광스포츠','보건의료복지','근로고용','시설물관리','교육','주거','물류'],
+  values: [195,188,124,110,100,90,82,37,21,5,3]
+};
+
+const typeData = {
+  labels: ['대화행정형','생명안전형','물리제어형'],
+  values: [391,329,235]
+};
+
+const aiCities = {
+  labels: ['여수시','의왕시','광양시','울산광역시','남원시','충주시','청주시','통영시','계룡시','경산시','상주시','공주시','구리시','거제시','군포시'],
+  values: [55.6,44.4,42.9,38.9,37.0,36.8,33.3,29.4,28.6,27.8,27.3,26.3,25.0,21.4,23.5]
+};
+
+// Implementation status per city (이행실적 32개 only, sorted by total desc)
+const implCities = {
+  labels: ['울산','청주','남원','거제','사천','평택','횡성','구미','옥천','해남','경주','상주','양평','함안','충주','경산','여수','공주','충주','군포','통영','원주','계룡','광양','정선','제천','의왕','구리','홍천','과천','산청','고령'],
+  completed:[15,12,9,10,8,7,0,13,5,8,1,1,10,9,1,1,6,6,1,3,10,12,3,2,0,0,6,7,0,6,2,1],
+  inProgress:[18,8,11,9,8,12,0,12,6,11,18,7,8,3,17,16,9,7,17,10,3,3,5,6,10,11,3,1,3,9,0,0],
+  notStarted:[3,10,7,9,11,7,25,0,17,13,2,14,4,10,1,1,3,6,1,4,4,0,6,6,2,9,0,0,0,9,0,0]
+};
+
+const delayData = {
+  labels: ['D06 사업재검토','D01 예산미확보','D05 대체서비스','D04 제도미비','D07 기타','D03 인프라지연','D02 기술한계'],
+  values: [82,44,29,27,19,15,4],
+  colors: ['#0891b2','#ef4444','#10b981','#f59e0b','#94a3b8','#8b5cf6','#ec4899']
+};
+
+// Colors
+const palette = ['#0891b2','#06b6d4','#14b8a6','#10b981','#f59e0b','#f97316','#ef4444','#ec4899','#8b5cf6','#6366f1','#94a3b8'];
+const typePalette = ['#0891b2','#10b981','#f59e0b'];
+
+// === CHART 1: Field distribution (horizontal bar) ===
+new Chart(document.getElementById('chartField'), {
+  type: 'bar',
+  data: {
+    labels: fieldData.labels,
+    datasets: [{
+      data: fieldData.values,
+      backgroundColor: palette,
+      borderRadius: 4,
+      barThickness: 20
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend:{display:false}, tooltip:{callbacks:{label:ctx=>ctx.raw+'건 ('+(ctx.raw/955*100).toFixed(1)+'%)'}} },
+    scales: { x:{grid:{display:false}}, y:{grid:{display:false}} }
+  }
+});
+document.getElementById('chartField').parentElement.style.height = '340px';
+
+// === CHART 2: Service type (doughnut) ===
+new Chart(document.getElementById('chartType'), {
+  type: 'doughnut',
+  data: {
+    labels: typeData.labels,
+    datasets: [{
+      data: typeData.values,
+      backgroundColor: typePalette,
+      borderWidth: 2,
+      borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '55%',
+    plugins: {
+      legend: { position:'bottom', labels:{font:{size:12},padding:12} },
+      tooltip: { callbacks: { label: ctx => ctx.label+': '+ctx.raw+'건 ('+(ctx.raw/955*100).toFixed(1)+'%)' } }
+    }
+  }
+});
+
+// === CHART 3: AI ratio by city (horizontal bar) ===
+new Chart(document.getElementById('chartAI'), {
+  type: 'bar',
+  data: {
+    labels: aiCities.labels,
+    datasets: [{
+      data: aiCities.values,
+      backgroundColor: aiCities.values.map(v=>v>30?'#0891b2':v>20?'#14b8a6':'#94a3b8'),
+      borderRadius: 4,
+      barThickness: 18
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend:{display:false},
+      tooltip:{callbacks:{label:ctx=>ctx.raw+'%'}}
+    },
+    scales: {
+      x:{max:60,grid:{display:false},ticks:{callback:v=>v+'%'}},
+      y:{grid:{display:false}}
+    }
+  }
+});
+document.getElementById('chartAI').parentElement.style.height = '400px';
+
+// === CHART 4: Implementation stacked bar ===
+// Sort by total desc, pick top 20
+const implIdxs = implCities.labels.map((_,i)=>i);
+implIdxs.sort((a,b)=>(implCities.completed[b]+implCities.inProgress[b]+implCities.notStarted[b])-(implCities.completed[a]+implCities.inProgress[a]+implCities.notStarted[a]));
+const top20 = implIdxs.slice(0,20);
+
+new Chart(document.getElementById('chartImpl'), {
+  type: 'bar',
+  data: {
+    labels: top20.map(i=>implCities.labels[i]),
+    datasets: [
+      { label:'완료', data:top20.map(i=>implCities.completed[i]), backgroundColor:'#10b981', borderRadius:2 },
+      { label:'추진중', data:top20.map(i=>implCities.inProgress[i]), backgroundColor:'#f59e0b', borderRadius:2 },
+      { label:'미추진', data:top20.map(i=>implCities.notStarted[i]), backgroundColor:'#ef4444', borderRadius:2 }
+    ]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend:{position:'top',labels:{font:{size:11}}} },
+    scales: {
+      x:{stacked:true,grid:{display:false}},
+      y:{stacked:true,grid:{display:false}}
+    }
+  }
+});
+document.getElementById('chartImpl').parentElement.style.height = '500px';
+
+// === CHART 5: Delay pie ===
+new Chart(document.getElementById('chartDelay'), {
+  type: 'doughnut',
+  data: {
+    labels: delayData.labels,
+    datasets: [{
+      data: delayData.values,
+      backgroundColor: delayData.colors,
+      borderWidth: 2,
+      borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true,
+    cutout: '50%',
+    plugins: {
+      legend: { position:'bottom', labels:{font:{size:10},padding:8} },
+      tooltip: { callbacks:{ label:ctx=>ctx.label+': '+ctx.raw+'건 ('+(ctx.raw/220*100).toFixed(1)+'%)' } }
+    }
+  }
+});
+
+// === CHART 6: Radar by city type ===
+new Chart(document.getElementById('chartRadar'), {
+  type: 'radar',
+  data: {
+    labels: ['Hardware','Software','Humanware','Orgware'],
+    datasets: [
+      { label:'광역', data:[3.50,3.00,1.50,1.00], borderColor:'#0891b2', backgroundColor:'rgba(8,145,178,0.1)', pointRadius:4 },
+      { label:'대도시', data:[2.50,2.67,2.00,1.17], borderColor:'#8b5cf6', backgroundColor:'rgba(139,92,246,0.1)', pointRadius:4 },
+      { label:'중소도시', data:[2.56,3.00,1.78,1.44], borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.1)', pointRadius:4 },
+      { label:'소도시', data:[2.27,2.55,1.45,1.09], borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.1)', pointRadius:4 },
+      { label:'농어촌', data:[2.44,2.22,1.56,1.44], borderColor:'#ef4444', backgroundColor:'rgba(239,68,68,0.1)', pointRadius:4 }
+    ]
+  },
+  options: {
+    responsive: true,
+    scales: {
+      r: { min:0, max:4, ticks:{stepSize:1,font:{size:10}}, pointLabels:{font:{size:12,weight:'bold'}} }
+    },
+    plugins: { legend:{position:'bottom',labels:{font:{size:11},padding:10}} }
+  }
+});
+
+</script>
+</body>
+</html>

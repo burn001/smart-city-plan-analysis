@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>울산광역시 - 스마트도시 서비스 상세</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:#f0f4f8; --surface:#fff; --surface2:#e2e8f0;
+  --header-bg:#0f2b46; --text:#1a202c; --text2:#64748b; --text3:#94a3b8;
+  --accent:#0891b2; --green:#10b981; --yellow:#f59e0b; --red:#ef4444;
+  --purple:#8b5cf6; --border:#e2e8f0; --shadow:0 1px 3px rgba(0,0,0,0.08); --radius:12px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Pretendard','Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+
+.header { background:linear-gradient(135deg,#0f2b46 0%,#164e63 100%); color:#fff; padding:32px 0 24px; }
+.header-inner { max-width:1200px; margin:0 auto; padding:0 24px; }
+.header h1 { font-size:1.6rem; font-weight:800; margin-bottom:4px; }
+.header .meta { color:#94a3b8; font-size:0.85rem; display:flex; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
+.stat-bar { display:flex; gap:10px; flex-wrap:wrap; }
+.stat-pill { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); border-radius:99px; padding:6px 16px; font-size:0.82rem; font-weight:600; }
+.stat-pill .num { color:#38bdf8; }
+
+.nav-bar { background:var(--surface); border-bottom:1px solid var(--border); padding:10px 0; position:sticky; top:0; z-index:10; }
+.nav-inner { max-width:1200px; margin:0 auto; padding:0 24px; display:flex; justify-content:space-between; align-items:center; font-size:0.82rem; }
+.nav-inner a { color:var(--accent); text-decoration:none; font-weight:600; }
+.nav-inner a:hover { text-decoration:underline; }
+
+.container { max-width:1200px; margin:0 auto; padding:24px; }
+.section { margin-bottom:28px; }
+.section-title { font-size:1.05rem; font-weight:700; color:var(--header-bg); margin-bottom:14px; padding-left:10px; border-left:4px solid var(--accent); }
+
+.card { background:var(--surface); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); border:1px solid var(--border); }
+.card-title { font-size:0.8rem; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:12px; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+@media(max-width:900px) { .grid-2,.grid-4 { grid-template-columns:1fr; } }
+
+.mini-stat { text-align:center; padding:16px 12px; }
+.mini-stat .big { font-size:1.8rem; font-weight:800; line-height:1.1; }
+.mini-stat .label { font-size:0.72rem; color:var(--text2); margin-top:4px; }
+
+.ware-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:12px; }
+.ware-item { text-align:center; padding:14px 8px; background:var(--bg); border-radius:8px; }
+.ware-item .score { font-size:1.6rem; font-weight:800; }
+.ware-item .wlabel { font-size:0.72rem; color:var(--text2); margin-top:2px; }
+
+/* Table */
+.tbl-wrap { overflow-x:auto; }
+.svc-table { width:100%; border-collapse:collapse; font-size:0.78rem; }
+.svc-table th { text-align:left; padding:8px 10px; font-weight:600; color:var(--text2); font-size:0.7rem; text-transform:uppercase; border-bottom:2px solid var(--border); background:#f8fafc; position:sticky; top:0; }
+.svc-table td { padding:8px 10px; border-bottom:1px solid var(--border); vertical-align:top; }
+.svc-table tr:hover td { background:#f0fdfa; }
+.num-cell { text-align:right; font-variant-numeric:tabular-nums; }
+.svc-name { font-weight:600; min-width:180px; }
+.delay-cell,.note-cell { max-width:220px; font-size:0.72rem; color:var(--text2); word-break:keep-all; }
+.tag-ai { display:inline-block; padding:1px 6px; border-radius:3px; font-size:0.65rem; font-weight:700; background:#dbeafe; color:#1d4ed8; margin-left:4px; vertical-align:middle; }
+.tag-field { display:inline-block; padding:1px 6px; border-radius:3px; font-size:0.68rem; font-weight:600; background:#f0fdfa; color:#0d9488; white-space:nowrap; }
+.status-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; vertical-align:middle; }
+
+.search-box { width:100%; padding:8px 12px; border:1px solid var(--border); border-radius:8px; font-size:0.82rem; margin-bottom:12px; }
+.search-box:focus { outline:none; border-color:var(--accent); }
+
+.filter-bar { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+.filter-btn { padding:4px 12px; border:1px solid var(--border); border-radius:6px; font-size:0.72rem; cursor:pointer; background:var(--surface); color:var(--text2); font-weight:600; }
+.filter-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+
+footer { text-align:center; padding:24px; color:var(--text3); font-size:0.72rem; border-top:1px solid var(--border); margin-top:16px; }
+footer a { color:var(--accent); text-decoration:none; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <h1>울산광역시</h1>
+    <div class="meta">
+      <span>경상 / 광역</span>
+      <span>인구 1,120,000명</span>
+      <span>소스: 이행실적</span>
+    </div>
+    <div class="stat-bar">
+      <div class="stat-pill"><span class="num">36</span>건 서비스</div>
+      <div class="stat-pill"><span class="num">14</span>건 AI (38.9%)</div>
+      <div class="stat-pill"><span class="num">41.7%</span> 완료율</div>
+      <div class="stat-pill">4-Ware <span class="num">2.5</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="nav-bar">
+  <div class="nav-inner">
+    <div><a href="옥천군.html">&larr; 옥천군</a></div>
+    <a href="../index.html">&#x1F3E0; 대시보드</a>
+    <div><a href="원주시.html">원주시 &rarr;</a></div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- 기본정보 + 4-Ware -->
+<div class="section">
+  <h2 class="section-title">기본 현황</h2>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">이행 현황</div>
+      <div class="grid-4" style="margin-bottom:12px;">
+        <div class="mini-stat"><div class="big" style="color:var(--accent);">36</div><div class="label">전체</div></div>
+        <div class="mini-stat"><div class="big" style="color:var(--green);">15</div><div class="label">완료</div></div>
+        <div class="mini-stat"><div class="big" style="color:var(--yellow);">18</div><div class="label">추진중</div></div>
+        <div class="mini-stat"><div class="big" style="color:var(--red);">3</div><div class="label">미추진</div></div>
+      </div>
+      <div style="height:24px;background:var(--surface2);border-radius:4px;overflow:hidden;display:flex;">
+        <div style="width:41.7%;background:var(--green);"></div>
+        <div style="width:50.0%;background:var(--yellow);"></div>
+        <div style="width:8.3%;background:var(--red);"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">4-Ware 성숙도</div>
+      <div class="ware-grid">
+        <div class="ware-item"><div class="score" style="color:var(--accent);">4</div><div class="wlabel">Hardware</div></div>
+        <div class="ware-item"><div class="score" style="color:var(--green);">3</div><div class="wlabel">Software</div></div>
+        <div class="ware-item"><div class="score" style="color:var(--yellow);">2</div><div class="wlabel">Human</div></div>
+        <div class="ware-item"><div class="score" style="color:var(--red);">1</div><div class="wlabel">Orgware</div></div>
+      </div>
+      <div style="text-align:center;font-size:0.82rem;color:var(--text2);">평균 <strong style="color:var(--accent);font-size:1.1rem;">2.5</strong> / 4.0</div>
+    </div>
+  </div>
+</div>
+
+<!-- 차트 -->
+<div class="section">
+  <h2 class="section-title">분야별 분포</h2>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">11개 법정 분야</div>
+      <div style="max-width:280px;margin:0 auto;"><canvas id="chartField"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">이행 상태</div>
+      <div style="max-width:280px;margin:0 auto;"><canvas id="chartStatus"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- 서비스 목록 -->
+<div class="section">
+  <h2 class="section-title">서비스 목록 (36건)</h2>
+  <div class="card">
+    <input type="text" class="search-box" id="searchInput" placeholder="서비스명, 분야, 상태로 검색...">
+    <div class="filter-bar" id="filterBar">
+      <button class="filter-btn active" data-filter="all">전체</button>
+      <button class="filter-btn" data-filter="ai">AI만</button>
+      <button class="filter-btn" data-filter="완료">완료</button>
+      <button class="filter-btn" data-filter="추진중">추진중</button>
+      <button class="filter-btn" data-filter="미추진">미추진</button>
+    </div>
+    <div class="tbl-wrap">
+      <table class="svc-table" id="svcTable">
+        <thead>
+          <tr>
+            <th>No</th><th>서비스명</th><th>분야</th><th>예산(백만)</th><th>이행률</th><th>상태</th><th>미추진 사유</th><th>비고</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+<td class="num-cell">1</td>
+<td class="svc-name">스마트 주차장 </td>
+<td><span class="tag-field">교통</span></td>
+<td class="num-cell">5,000</td>
+<td class="num-cell">37%</td>
+<td><span class="status-dot" style="background:#10b981"></span>완료</td>
+<td class="delay-cell"></td>
+<td class="note-cell">사업부서 추진계획 완료</td>
+</tr><tr>
+<td class="num-cell">2</td>
+<td class="svc-name">C-ITS &amp; 자율주행 셔틀버스 서비스 실증 <span class="tag tag-ai">AI</span></td>
+<td><span class="tag-field">교통</span></td>
+<td class="num-cell">14,600</td>
+<td class="num-cell">81%</td>
+<td><span class="status-dot" style="background:#10b981"></span>완료</td>
+<td class="delay-cell"></td>
+<td class="note-cell">사업부서 추진계획 완료; C-ITS 인프라, 자율주행차량 4대</td>
+</tr><tr>
+<td class="num-cell">3</td>
+<td class="svc-name">스마트 통합교통서비스(MaaS) </td>
+<td><span class="tag-field">교통</span></td>
+<td class="num-cell">3,600</td>
+<td class="num-cell">59%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell"></td>
+<td class="note-cell">울산 패스 MaaS 플랫폼 구축</td>
+</tr><tr>
+<td class="num-cell">4</td>
+<td class="svc-name">수요응답형 대중교통 <span class="tag tag-ai">AI</span></td>
+<td><span class="tag-field">교통</span></td>
+<td class="num-cell">4,800</td>
+<td class="num-cell">212%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell"></td>
+<td class="note-cell">마실택시·버스, DRT 7대; 자율주행(수요응답) 서비스</td>
+</tr><tr>
+<td class="num-cell">5</td>
+<td class="svc-name">스마트 교통안전 시스템 <span class="tag tag-ai">AI</span></td>
+<td><span class="tag-field">교통</span></td>
+<td class="num-cell">9,000</td>
+<td class="num-cell">237%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell"></td>
+<td class="note-cell">AI 활용 사각지대 차량·불법주정차 감지</td>
+</tr><tr>
+<td class="num-cell">6</td>
+<td class="svc-name">도심항공교통(UAM) 기반조성 <span class="tag tag-ai">AI</span></td>
+<td><span class="tag-field">교통</span></td>
+<td class="num-cell">8,000</td>
+<td class="num-cell">386%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell"></td>
+<td class="note-cell">디지털트윈 기반 UAM 실증; K-UAM R&amp;D</td>
+</tr><tr>
+<td class="num-cell">7</td>
+<td class="svc-name">스마트 클린버스쉘터 </td>
+<td><span class="tag-field">환경에너지수자원</span></td>
+<td class="num-cell">4,000</td>
+<td class="num-cell">128%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell"></td>
+<td class="note-cell">스마트 버스쉘터 81개소 설치</td>
+</tr><tr>
+<td class="num-cell">8</td>
+<td class="svc-name">스마트 클린로드 </td>
+<td><span class="tag-field">환경에너지수자원</span></td>
+<td class="num-cell">10,000</td>
+<td class="num-cell">0%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell">공모사업 미선정</td>
+<td class="note-cell">도로 살수장치 설치 공모 미선정</td>
+</tr><tr>
+<td class="num-cell">9</td>
+<td class="svc-name">데이터 기반 에너지 통합관리시스템 <span class="tag tag-ai">AI</span></td>
+<td><span class="tag-field">환경에너지수자원</span></td>
+<td class="num-cell">12,000</td>
+<td class="num-cell">22%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell"></td>
+<td class="note-cell">빅데이터 기반 에너지 사용량 모니터링·예측</td>
+</tr><tr>
+<td class="num-cell">10</td>
+<td class="svc-name">수소차-전기차 충전 융합스테이션 </td>
+<td><span class="tag-field">환경에너지수자원</span></td>
+<td class="num-cell">20,000</td>
+<td class="num-cell">35%</td>
+<td><span class="status-dot" style="background:#10b981"></span>완료</td>
+<td class="delay-cell"></td>
+<td class="note-cell">사업부서 추진계획 완료</td>
+</tr><tr>
+<td class="num-cell">11</td>
+<td class="svc-name">스마트 쓰레기통 및 불법투기 감시시스템 </td>
+<td><span class="tag-field">환경에너지수자원</span></td>
+<td class="num-cell">10,000</td>
+<td class="num-cell">71%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell"></td>
+<td class="note-cell">IoT 센서 기반 스마트 쓰레기통</td>
+</tr><tr>
+<td class="num-cell">12</td>
+<td class="svc-name">AI 기반 중고거래 플랫폼 <span class="tag tag-ai">AI</span></td>
+<td><span class="tag-field">환경에너지수자원</span></td>
+<td class="num-cell">1,000</td>
+<td class="num-cell">0%</td>
+<td><span class="status-dot" style="background:#ef4444"></span>미추진</td>
+<td class="delay-cell">코로나 종료 및 민간 온라인 서비스 활성화로 장기적 검토 필요</td>
+<td class="note-cell">AI 기반 자원순환 플랫폼</td>
+</tr><tr>
+<td class="num-cell">13</td>
+<td class="svc-name">다목적 AI 스마트 폴 <span class="tag tag-ai">AI</span></td>
+<td><span class="tag-field">방범방재</span></td>
+<td class="num-cell">4,000</td>
+<td class="num-cell">12%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell"></td>
+<td class="note-cell">ICT 기술(CCTV, Wi-Fi, IoT센서, 전기충전 등) 통합 AI 스마트 폴</td>
+</tr><tr>
+<td class="num-cell">14</td>
+<td class="svc-name">스마트 드론 안심지킴이 서비스 </td>
+<td><span class="tag-field">방범방재</span></td>
+<td class="num-cell">1,000</td>
+<td class="num-cell">440%</td>
+<td><span class="status-dot" style="background:#10b981"></span>완료</td>
+<td class="delay-cell"></td>
+<td class="note-cell">사업부서 추진계획 완료; 드론 통합관제 플랫폼 구축</td>
+</tr><tr>
+<td class="num-cell">15</td>
+<td class="svc-name">도시침수 스마트 대응 서비스 </td>
+<td><span class="tag-field">방범방재</span></td>
+<td class="num-cell">3,000</td>
+<td class="num-cell">6%</td>
+<td><span class="status-dot" style="background:#10b981"></span>완료</td>
+<td class="delay-cell"></td>
+<td class="note-cell">사업부서 추진계획 완료; ICT 기반 홍수재해관리시스템 고도화</td>
+</tr><tr>
+<td class="num-cell">16</td>
+<td class="svc-name">화학공단 주변 실시간 관측 서비스 </td>
+<td><span class="tag-field">방범방재</span></td>
+<td class="num-cell">5,000</td>
+<td class="num-cell">31%</td>
+<td><span class="status-dot" style="background:#10b981"></span>완료</td>
+<td class="delay-cell"></td>
+<td class="note-cell">사업부서 추진계획 완료; 유해화학물질 감지 센서·확산예측</td>
+</tr><tr>
+<td class="num-cell">17</td>
+<td class="svc-name">5G 기반 응급의료서비스 </td>
+<td><span class="tag-field">보건의료복지</span></td>
+<td class="num-cell">23,000</td>
+<td class="num-cell">-</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell"></td>
+<td class="note-cell">중앙(소방청) 보급 방식; 119구급 스마트시스템</td>
+</tr><tr>
+<td class="num-cell">18</td>
+<td class="svc-name">스마트 헬스케어 <span class="tag tag-ai">AI</span></td>
+<td><span class="tag-field">보건의료복지</span></td>
+<td class="num-cell">5,600</td>
+<td class="num-cell">116%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell"></td>
+<td class="note-cell">AI 로봇 독거노인 돌봄서비스; 건강체크 부스·시니어 홈케어</td>
+</tr><tr>
+<td class="num-cell">19</td>
+<td class="svc-name">스마트 치매노인 및 아동 실종방지 서비스 </td>
+<td><span class="tag-field">보건의료복지</span></td>
+<td class="num-cell">2,800</td>
+<td class="num-cell">0%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell">중앙부처 공모사업 참여 준비</td>
+<td class="note-cell">Wi-Fi 기반 위치인식</td>
+</tr><tr>
+<td class="num-cell">20</td>
+<td class="svc-name">시설예약통합시스템 </td>
+<td><span class="tag-field">보건의료복지</span></td>
+<td class="num-cell">200</td>
+<td class="num-cell">175%</td>
+<td><span class="status-dot" style="background:#10b981"></span>완료</td>
+<td class="delay-cell"></td>
+<td class="note-cell">사업부서 추진계획 완료</td>
+</tr><tr>
+<td class="num-cell">21</td>
+<td class="svc-name">스마트관광 플랫폼 <span class="tag tag-ai">AI</span></td>
+<td><span class="tag-field">문화관광스포츠</span></td>
+<td class="num-cell">7,000</td>
+<td class="num-cell">134%</td>
+<td><span class="status-dot" style="background:#10b981"></span>완료</td>
+<td class="delay-cell"></td>
+<td class="note-cell">사업부서 추진계획 완료; '왔어울산' 플랫폼; 빅데이터 관광정보 분석</td>
+</tr><tr>
+<td class="num-cell">22</td>
+<td class="svc-name">스마트 공원 </td>
+<td><span class="tag-field">문화관광스포츠</span></td>
+<td class="num-cell">4,400</td>
+<td class="num-cell">24%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell"></td>
+<td class="note-cell">IoT, 빅데이터, 클라우드, AI, 무인자동차, 드론 융복합 공원</td>
+</tr><tr>
+<td class="num-cell">23</td>
+<td class="svc-name">AR 기반 태화강 국가정원 사계절 체험 서비스 <span class="tag tag-ai">AI</span></td>
+<td><span class="tag-field">문화관광스포츠</span></td>
+<td class="num-cell">1,200</td>
+<td class="num-cell">0%</td>
+<td><span class="status-dot" style="background:#ef4444"></span>미추진</td>
+<td class="delay-cell">2028 울산국제정원박람회와 연계하여 종합적인 추진 필요</td>
+<td class="note-cell">디지털트윈 방식 AR 체험 콘텐츠</td>
+</tr><tr>
+<td class="num-cell">24</td>
+<td class="svc-name">스마트그린산단 통합관제시스템 <span class="tag tag-ai">AI</span></td>
+<td><span class="tag-field">근로고용</span></td>
+<td class="num-cell">13,000</td>
+<td class="num-cell">100%</td>
+<td><span class="status-dot" style="background:#10b981"></span>완료</td>
+<td class="delay-cell"></td>
+<td class="note-cell">사업부서 추진계획 완료; 디지털트윈 기반 산단 통합관제</td>
+</tr><tr>
+<td class="num-cell">25</td>
+<td class="svc-name">산업단지 스마트 물류 플랫폼 </td>
+<td><span class="tag-field">근로고용</span></td>
+<td class="num-cell">5,500</td>
+<td class="num-cell">101%</td>
+<td><span class="status-dot" style="background:#10b981"></span>완료</td>
+<td class="delay-cell"></td>
+<td class="note-cell">사업부서 추진계획 완료</td>
+</tr><tr>
+<td class="num-cell">26</td>
+<td class="svc-name">산업단지 스마트 에너지 플랫폼 </td>
+<td><span class="tag-field">근로고용</span></td>
+<td class="num-cell">7,700</td>
+<td class="num-cell">109%</td>
+<td><span class="status-dot" style="background:#10b981"></span>완료</td>
+<td class="delay-cell"></td>
+<td class="note-cell">사업부서 추진계획 완료</td>
+</tr><tr>
+<td class="num-cell">27</td>
+<td class="svc-name">산업단지 에너지 자급자족형 인프라 조성 </td>
+<td><span class="tag-field">근로고용</span></td>
+<td class="num-cell">55,400</td>
+<td class="num-cell">40%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell"></td>
+<td class="note-cell">신재생 전력설비, 통합관리 플랫폼</td>
+</tr><tr>
+<td class="num-cell">28</td>
+<td class="svc-name">데이터 기반 지역 제조업 혁신 플랫폼 <span class="tag tag-ai">AI</span></td>
+<td><span class="tag-field">근로고용</span></td>
+<td class="num-cell">12,000</td>
+<td class="num-cell">36%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell"></td>
+<td class="note-cell">인공지능 솔루션 기반 지역 중소기업 스마트 제조 혁신; 디지털트윈 활용</td>
+</tr><tr>
+<td class="num-cell">29</td>
+<td class="svc-name">스마트제조 일자리 플랫폼 </td>
+<td><span class="tag-field">근로고용</span></td>
+<td class="num-cell">8,800</td>
+<td class="num-cell">97%</td>
+<td><span class="status-dot" style="background:#10b981"></span>완료</td>
+<td class="delay-cell"></td>
+<td class="note-cell">사업부서 추진계획 완료</td>
+</tr><tr>
+<td class="num-cell">30</td>
+<td class="svc-name">스마트팜 </td>
+<td><span class="tag-field">근로고용</span></td>
+<td class="num-cell">37,000</td>
+<td class="num-cell">46%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell">사업종료 예정</td>
+<td class="note-cell">지역특화 임대형 스마트팜 공모 미선정</td>
+</tr><tr>
+<td class="num-cell">31</td>
+<td class="svc-name">비대면 스마트장터 </td>
+<td><span class="tag-field">근로고용</span></td>
+<td class="num-cell">500</td>
+<td class="num-cell">471%</td>
+<td><span class="status-dot" style="background:#10b981"></span>완료</td>
+<td class="delay-cell"></td>
+<td class="note-cell">사업부서 추진계획 완료; 디지털 전통시장 플랫폼</td>
+</tr><tr>
+<td class="num-cell">32</td>
+<td class="svc-name">스마트도시 데이터허브 <span class="tag tag-ai">AI</span></td>
+<td><span class="tag-field">행정</span></td>
+<td class="num-cell">4,000</td>
+<td class="num-cell">159%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell"></td>
+<td class="note-cell">AI 기반 교통량 데이터 플랫폼 포함; 빅데이터 융복합 분석</td>
+</tr><tr>
+<td class="num-cell">33</td>
+<td class="svc-name">디지털 트윈 <span class="tag tag-ai">AI</span></td>
+<td><span class="tag-field">행정</span></td>
+<td class="num-cell">4,000</td>
+<td class="num-cell">248%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell"></td>
+<td class="note-cell">디지털트윈; AI와 공간정보 융합 검색서비스</td>
+</tr><tr>
+<td class="num-cell">34</td>
+<td class="svc-name">스마트도시 메타버스 플랫폼 </td>
+<td><span class="tag-field">행정</span></td>
+<td class="num-cell">800</td>
+<td class="num-cell">336%</td>
+<td><span class="status-dot" style="background:#10b981"></span>완료</td>
+<td class="delay-cell"></td>
+<td class="note-cell">사업부서 추진계획 완료</td>
+</tr><tr>
+<td class="num-cell">35</td>
+<td class="svc-name">디지털 집현전 </td>
+<td><span class="tag-field">행정</span></td>
+<td class="num-cell">500</td>
+<td class="num-cell">100%</td>
+<td><span class="status-dot" style="background:#10b981"></span>완료</td>
+<td class="delay-cell"></td>
+<td class="note-cell">사업부서 추진계획 완료; 지식정보 통합플랫폼</td>
+</tr><tr>
+<td class="num-cell">36</td>
+<td class="svc-name">모바일 투표 플랫폼 </td>
+<td><span class="tag-field">행정</span></td>
+<td class="num-cell">300</td>
+<td class="num-cell">0%</td>
+<td><span class="status-dot" style="background:#ef4444"></span>미추진</td>
+<td class="delay-cell">블록체인 기술 미보편화, 민간 서비스 시장 침해 등 고려하여 장기 검토 필요</td>
+<td class="note-cell"></td>
+</tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div><!-- container -->
+
+<footer>
+  <a href="../index.html">&#x1F3E0; 대시보드로 돌아가기</a> |
+  데이터 기준일: 2026-03-04 | 울산광역시 상세 페이지
+</footer>
+
+<script>
+// Field chart
+new Chart(document.getElementById('chartField'), {
+  type:'doughnut',
+  data:{
+    labels:["행정", "교통", "보건의료복지", "환경에너지수자원", "방범방재", "문화관광스포츠", "근로고용"],
+    datasets:[{ data:[5, 6, 4, 6, 4, 3, 8], backgroundColor:["#0891b2", "#06b6d4", "#14b8a6", "#10b981", "#f59e0b", "#ec4899", "#6366f1"], borderWidth:2, borderColor:'#fff' }]
+  },
+  options:{ responsive:true, cutout:'50%', plugins:{ legend:{ position:'bottom', labels:{ font:{ size:10 }, padding:8 } } } }
+});
+
+// Status chart
+const statusData = [
+  15, 18, 3,
+  0
+];
+const statusLabels = ['완료','추진중','미추진','기타'];
+const statusColors = ['#10b981','#f59e0b','#ef4444','#94a3b8'];
+new Chart(document.getElementById('chartStatus'), {
+  type:'doughnut',
+  data:{
+    labels: statusLabels.filter((_,i) => statusData[i]>0),
+    datasets:[{ data: statusData.filter(v=>v>0), backgroundColor: statusColors.filter((_,i)=>statusData[i]>0), borderWidth:2, borderColor:'#fff' }]
+  },
+  options:{ responsive:true, cutout:'50%', plugins:{ legend:{ position:'bottom', labels:{ font:{ size:10 }, padding:8 } } } }
+});
+
+// Search & filter
+const searchInput = document.getElementById('searchInput');
+const table = document.getElementById('svcTable');
+const rows = table.querySelectorAll('tbody tr');
+const filterBtns = document.querySelectorAll('.filter-btn');
+let activeFilter = 'all';
+
+function applyFilters() {
+  const q = searchInput.value.toLowerCase();
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    const matchSearch = !q || text.includes(q);
+    let matchFilter = true;
+    if (activeFilter === 'ai') matchFilter = row.innerHTML.includes('tag-ai');
+    else if (activeFilter !== 'all') {
+      const statusCell = row.cells[5]?.textContent.trim();
+      matchFilter = statusCell === activeFilter;
+    }
+    row.style.display = (matchSearch && matchFilter) ? '' : 'none';
+  });
+}
+
+searchInput.addEventListener('input', applyFilters);
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    applyFilters();
+  });
+});
+</script>
+</body>
+</html>

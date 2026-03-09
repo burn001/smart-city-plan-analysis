@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>37개 지자체 스마트도시 서비스 분포</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Pretendard','Noto Sans KR',sans-serif; background:#1a1a2e; }
+  #header { background:linear-gradient(135deg,#16213e,#0f3460); padding:20px 30px; color:#fff; }
+  #header h1 { font-size:22px; font-weight:700; }
+  #header p { font-size:13px; color:#a0aec0; margin-top:4px; }
+  #map { width:100%; height:calc(100vh - 80px); }
+  .legend {
+    background:rgba(26,26,46,0.95); padding:14px 18px; border-radius:10px;
+    color:#e2e8f0; font-size:12px; line-height:1.8; box-shadow:0 4px 15px rgba(0,0,0,0.3);
+  }
+  .legend h4 { font-size:13px; font-weight:700; margin-bottom:8px; color:#63b3ed; }
+  .legend-row { display:flex; align-items:center; gap:8px; margin:3px 0; }
+  .legend-circle { border-radius:50%; display:inline-block; border:1px solid rgba(255,255,255,0.3); }
+  .color-bar {
+    width:180px; height:14px; border-radius:7px;
+    background:linear-gradient(to right,#3182ce,#63b3ed,#f6e05e,#ed8936,#e53e3e);
+    margin:6px 0;
+  }
+  .color-labels { display:flex; justify-content:space-between; font-size:10px; color:#a0aec0; }
+  .leaflet-popup-content-wrapper {
+    background:rgba(26,26,46,0.97)!important; color:#e2e8f0!important;
+    border-radius:10px!important; box-shadow:0 4px 15px rgba(0,0,0,0.4)!important;
+  }
+  .leaflet-popup-tip { background:rgba(26,26,46,0.97)!important; }
+  .popup-title { font-size:15px; font-weight:700; color:#63b3ed; margin-bottom:8px; }
+  .popup-row { display:flex; justify-content:space-between; padding:3px 0; font-size:12px; }
+  .popup-label { color:#a0aec0; }
+  .popup-value { font-weight:600; color:#fff; }
+  .popup-bar { height:6px; border-radius:3px; background:#2d3748; margin:4px 0 2px; }
+  .popup-bar-fill { height:100%; border-radius:3px; }
+</style>
+</head>
+<body>
+<div id="header">
+  <h1>37개 지자체 스마트도시 서비스 분포</h1>
+  <p>버블 크기: 서비스 수 | 버블 색상: AI 실연계 비율 (%) | 클릭하여 상세 정보 확인</p>
+</div>
+<div id="map"></div>
+<script>
+const data = [
+  {name:"거제시",lat:34.8806,lng:128.6211,pop:240000,region:"경상",type:"중소도시",total:28,ai:6,aiR:21.4,comp:71.4,ware:2.2},
+  {name:"경산시",lat:35.825,lng:128.7414,pop:270000,region:"경상",type:"중소도시",total:18,ai:5,aiR:27.8,comp:66.7,ware:1.8},
+  {name:"경주시",lat:35.8562,lng:129.2247,pop:250000,region:"경상",type:"중소도시",total:21,ai:3,aiR:14.3,comp:90.5,ware:2.2},
+  {name:"계룡시",lat:36.2747,lng:127.2487,pop:44000,region:"충청",type:"소도시",total:14,ai:4,aiR:28.6,comp:78.6,ware:1.5},
+  {name:"고령군",lat:35.7261,lng:128.2628,pop:32000,region:"경상",type:"농어촌",total:1,ai:0,aiR:0.0,comp:100.0,ware:2.0},
+  {name:"공주시",lat:36.4465,lng:127.1189,pop:100000,region:"충청",type:"소도시",total:19,ai:5,aiR:26.3,comp:57.9,ware:2.0},
+  {name:"과천시",lat:37.4292,lng:126.9876,pop:72000,region:"경기",type:"소도시",total:24,ai:1,aiR:4.2,comp:62.5,ware:1.5},
+  {name:"광양시",lat:34.9407,lng:127.6956,pop:150000,region:"전라",type:"중소도시",total:14,ai:6,aiR:42.9,comp:57.1,ware:1.8},
+  {name:"구리시",lat:37.5943,lng:127.1295,pop:200000,region:"경기",type:"소도시",total:8,ai:2,aiR:25.0,comp:100.0,ware:1.0},
+  {name:"구미시",lat:36.1195,lng:128.3446,pop:410000,region:"경상",type:"중소도시",total:25,ai:4,aiR:16.0,comp:100.0,ware:2.8},
+  {name:"군포시",lat:37.3614,lng:126.9352,pop:270000,region:"경기",type:"소도시",total:17,ai:4,aiR:23.5,comp:47.1,ware:1.8},
+  {name:"남원시",lat:35.4164,lng:127.3903,pop:78000,region:"전라",type:"소도시",total:27,ai:10,aiR:37.0,comp:63.0,ware:2.5},
+  {name:"대구광역시",lat:35.8714,lng:128.6014,pop:2380000,region:"경상",type:"광역",total:111,ai:3,aiR:2.7,comp:0.0,ware:2.0},
+  {name:"부천시",lat:37.5034,lng:126.766,pop:820000,region:"경기",type:"대도시",total:47,ai:10,aiR:21.3,comp:0.0,ware:2.0},
+  {name:"사천시",lat:35.0037,lng:128.0647,pop:110000,region:"경상",type:"소도시",total:27,ai:5,aiR:18.5,comp:33.3,ware:2.2},
+  {name:"산청군",lat:35.4153,lng:127.8734,pop:33000,region:"경상",type:"농어촌",total:2,ai:0,aiR:0.0,comp:100.0,ware:1.5},
+  {name:"상주시",lat:36.411,lng:128.159,pop:95000,region:"경상",type:"소도시",total:22,ai:6,aiR:27.3,comp:36.4,ware:1.5},
+  {name:"수원시",lat:37.2636,lng:127.0286,pop:1200000,region:"경기",type:"대도시",total:86,ai:8,aiR:9.3,comp:0.0,ware:2.0},
+  {name:"안양시",lat:37.3943,lng:126.9568,pop:560000,region:"경기",type:"대도시",total:48,ai:1,aiR:2.1,comp:0.0,ware:1.8},
+  {name:"양평군",lat:37.4917,lng:127.4876,pop:120000,region:"경기",type:"농어촌",total:22,ai:4,aiR:18.2,comp:63.6,ware:2.5},
+  {name:"여수시",lat:34.7604,lng:127.6622,pop:280000,region:"전라",type:"중소도시",total:18,ai:10,aiR:55.6,comp:44.4,ware:2.5},
+  {name:"옥천군",lat:36.306,lng:127.5713,pop:50000,region:"충청",type:"농어촌",total:28,ai:1,aiR:3.6,comp:39.3,ware:1.8},
+  {name:"울산광역시",lat:35.5384,lng:129.3114,pop:1120000,region:"경상",type:"광역",total:36,ai:14,aiR:38.9,comp:91.7,ware:2.5},
+  {name:"원주시",lat:37.3422,lng:127.9202,pop:360000,region:"강원",type:"중소도시",total:15,ai:3,aiR:20.0,comp:100.0,ware:1.8},
+  {name:"의왕시",lat:37.3449,lng:126.9685,pop:160000,region:"경기",type:"소도시",total:9,ai:4,aiR:44.4,comp:100.0,ware:2.8},
+  {name:"정선군",lat:37.3808,lng:128.6609,pop:35000,region:"강원",type:"농어촌",total:12,ai:2,aiR:16.7,comp:75.0,ware:1.0},
+  {name:"제천시",lat:37.1326,lng:128.191,pop:130000,region:"충청",type:"소도시",total:20,ai:2,aiR:10.0,comp:55.0,ware:1.8},
+  {name:"진주시",lat:35.1802,lng:128.1076,pop:350000,region:"경상",type:"중소도시",total:23,ai:5,aiR:21.7,comp:82.6,ware:2.2},
+  {name:"청주시",lat:36.6424,lng:127.489,pop:850000,region:"충청",type:"대도시",total:30,ai:10,aiR:33.3,comp:60.0,ware:2.5},
+  {name:"충주시",lat:36.991,lng:127.9259,pop:210000,region:"충청",type:"중소도시",total:19,ai:7,aiR:36.8,comp:47.4,ware:2.5},
+  {name:"통영시",lat:34.8544,lng:128.433,pop:130000,region:"경상",type:"소도시",total:17,ai:5,aiR:29.4,comp:94.1,ware:1.8},
+  {name:"평택시",lat:36.9908,lng:127.0858,pop:580000,region:"경기",type:"대도시",total:26,ai:4,aiR:15.4,comp:69.2,ware:2.2},
+  {name:"함안군",lat:35.2724,lng:128.4066,pop:64000,region:"경상",type:"농어촌",total:22,ai:2,aiR:9.1,comp:86.4,ware:2.0},
+  {name:"해남군",lat:34.5714,lng:126.5993,pop:65000,region:"전라",type:"농어촌",total:32,ai:5,aiR:15.6,comp:59.4,ware:2.5},
+  {name:"홍천군",lat:37.6972,lng:127.8886,pop:68000,region:"강원",type:"농어촌",total:3,ai:0,aiR:0.0,comp:100.0,ware:1.8},
+  {name:"화성시",lat:37.1995,lng:126.8313,pop:940000,region:"경기",type:"대도시",total:39,ai:3,aiR:7.7,comp:0.0,ware:2.0},
+  {name:"횡성군",lat:37.4919,lng:127.9847,pop:45000,region:"강원",type:"농어촌",total:25,ai:5,aiR:20.0,comp:0.0,ware:2.2}
+];
+
+const map = L.map('map', {
+  center: [36.0, 127.8],
+  zoom: 7,
+  zoomControl: true,
+  attributionControl: true
+});
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; OSM &copy; CARTO',
+  subdomains: 'abcd', maxZoom: 19
+}).addTo(map);
+
+function getRadius(total) {
+  const mn=1, mx=111;
+  const ratio = (total - mn) / (mx - mn);
+  return 8 + ratio * 22;
+}
+
+function getColor(aiRatio) {
+  if (aiRatio >= 40) return '#e53e3e';
+  if (aiRatio >= 30) return '#ed8936';
+  if (aiRatio >= 20) return '#f6e05e';
+  if (aiRatio >= 10) return '#63b3ed';
+  return '#3182ce';
+}
+
+data.forEach(d => {
+  const r = getRadius(d.total);
+  const c = getColor(d.aiR);
+  const circle = L.circleMarker([d.lat, d.lng], {
+    radius: r, fillColor: c, color: '#fff', weight: 1.5,
+    opacity: 0.9, fillOpacity: 0.7
+  }).addTo(map);
+
+  const aiBarW = Math.min(d.aiR / 60 * 100, 100);
+  const compBarW = d.comp;
+  const wareBarW = d.ware / 4 * 100;
+
+  circle.bindPopup(`
+    <div style="min-width:220px">
+      <div class="popup-title">${d.name} <span style="font-size:11px;color:#a0aec0;font-weight:400">${d.type} | ${d.region}</span></div>
+      <div class="popup-row"><span class="popup-label">총 서비스</span><span class="popup-value">${d.total}건</span></div>
+      <div class="popup-row"><span class="popup-label">AI 실연계</span><span class="popup-value">${d.ai}건 (${d.aiR}%)</span></div>
+      <div class="popup-bar"><div class="popup-bar-fill" style="width:${aiBarW}%;background:${c}"></div></div>
+      <div class="popup-row"><span class="popup-label">이행률 (완료+추진중)</span><span class="popup-value">${d.comp}%</span></div>
+      <div class="popup-bar"><div class="popup-bar-fill" style="width:${compBarW}%;background:#48bb78"></div></div>
+      <div class="popup-row"><span class="popup-label">4-Ware 평균</span><span class="popup-value">${d.ware} / 4.0</span></div>
+      <div class="popup-bar"><div class="popup-bar-fill" style="width:${wareBarW}%;background:#9f7aea"></div></div>
+      <div class="popup-row" style="margin-top:4px"><span class="popup-label">인구</span><span class="popup-value">${(d.pop/10000).toFixed(1)}만명</span></div>
+    </div>
+  `, { maxWidth: 280 });
+
+  circle.bindTooltip(d.name, {
+    permanent: false, direction: 'top', offset: [0, -r],
+    className: 'city-tooltip'
+  });
+});
+
+// Legend
+const legend = L.control({ position: 'bottomright' });
+legend.onAdd = function() {
+  const div = L.DomUtil.create('div', 'legend');
+  div.innerHTML = `
+    <h4>AI 연계 비율 (%)</h4>
+    <div class="color-bar"></div>
+    <div class="color-labels"><span>0%</span><span>10%</span><span>20%</span><span>30%</span><span>40%+</span></div>
+    <h4 style="margin-top:12px">서비스 수 (버블 크기)</h4>
+    <div class="legend-row">
+      <span class="legend-circle" style="width:16px;height:16px;background:rgba(99,179,237,0.5)"></span>
+      <span>소규모 (~10건)</span>
+    </div>
+    <div class="legend-row">
+      <span class="legend-circle" style="width:26px;height:26px;background:rgba(99,179,237,0.5)"></span>
+      <span>중규모 (~30건)</span>
+    </div>
+    <div class="legend-row">
+      <span class="legend-circle" style="width:40px;height:40px;background:rgba(99,179,237,0.5)"></span>
+      <span>대규모 (50건+)</span>
+    </div>
+  `;
+  return div;
+};
+legend.addTo(map);
+</script>
+</body>
+</html>

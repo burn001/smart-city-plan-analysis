@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>광양시 - 스마트도시 서비스 상세</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg:#f0f4f8; --surface:#fff; --surface2:#e2e8f0;
+  --header-bg:#0f2b46; --text:#1a202c; --text2:#64748b; --text3:#94a3b8;
+  --accent:#0891b2; --green:#10b981; --yellow:#f59e0b; --red:#ef4444;
+  --purple:#8b5cf6; --border:#e2e8f0; --shadow:0 1px 3px rgba(0,0,0,0.08); --radius:12px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Pretendard','Segoe UI',system-ui,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; }
+
+.header { background:linear-gradient(135deg,#0f2b46 0%,#164e63 100%); color:#fff; padding:32px 0 24px; }
+.header-inner { max-width:1200px; margin:0 auto; padding:0 24px; }
+.header h1 { font-size:1.6rem; font-weight:800; margin-bottom:4px; }
+.header .meta { color:#94a3b8; font-size:0.85rem; display:flex; gap:16px; flex-wrap:wrap; margin-bottom:16px; }
+.stat-bar { display:flex; gap:10px; flex-wrap:wrap; }
+.stat-pill { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); border-radius:99px; padding:6px 16px; font-size:0.82rem; font-weight:600; }
+.stat-pill .num { color:#38bdf8; }
+
+.nav-bar { background:var(--surface); border-bottom:1px solid var(--border); padding:10px 0; position:sticky; top:0; z-index:10; }
+.nav-inner { max-width:1200px; margin:0 auto; padding:0 24px; display:flex; justify-content:space-between; align-items:center; font-size:0.82rem; }
+.nav-inner a { color:var(--accent); text-decoration:none; font-weight:600; }
+.nav-inner a:hover { text-decoration:underline; }
+
+.container { max-width:1200px; margin:0 auto; padding:24px; }
+.section { margin-bottom:28px; }
+.section-title { font-size:1.05rem; font-weight:700; color:var(--header-bg); margin-bottom:14px; padding-left:10px; border-left:4px solid var(--accent); }
+
+.card { background:var(--surface); border-radius:var(--radius); padding:20px; box-shadow:var(--shadow); border:1px solid var(--border); }
+.card-title { font-size:0.8rem; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:12px; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.grid-4 { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+@media(max-width:900px) { .grid-2,.grid-4 { grid-template-columns:1fr; } }
+
+.mini-stat { text-align:center; padding:16px 12px; }
+.mini-stat .big { font-size:1.8rem; font-weight:800; line-height:1.1; }
+.mini-stat .label { font-size:0.72rem; color:var(--text2); margin-top:4px; }
+
+.ware-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:12px; }
+.ware-item { text-align:center; padding:14px 8px; background:var(--bg); border-radius:8px; }
+.ware-item .score { font-size:1.6rem; font-weight:800; }
+.ware-item .wlabel { font-size:0.72rem; color:var(--text2); margin-top:2px; }
+
+/* Table */
+.tbl-wrap { overflow-x:auto; }
+.svc-table { width:100%; border-collapse:collapse; font-size:0.78rem; }
+.svc-table th { text-align:left; padding:8px 10px; font-weight:600; color:var(--text2); font-size:0.7rem; text-transform:uppercase; border-bottom:2px solid var(--border); background:#f8fafc; position:sticky; top:0; }
+.svc-table td { padding:8px 10px; border-bottom:1px solid var(--border); vertical-align:top; }
+.svc-table tr:hover td { background:#f0fdfa; }
+.num-cell { text-align:right; font-variant-numeric:tabular-nums; }
+.svc-name { font-weight:600; min-width:180px; }
+.delay-cell,.note-cell { max-width:220px; font-size:0.72rem; color:var(--text2); word-break:keep-all; }
+.tag-ai { display:inline-block; padding:1px 6px; border-radius:3px; font-size:0.65rem; font-weight:700; background:#dbeafe; color:#1d4ed8; margin-left:4px; vertical-align:middle; }
+.tag-field { display:inline-block; padding:1px 6px; border-radius:3px; font-size:0.68rem; font-weight:600; background:#f0fdfa; color:#0d9488; white-space:nowrap; }
+.status-dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; vertical-align:middle; }
+
+.search-box { width:100%; padding:8px 12px; border:1px solid var(--border); border-radius:8px; font-size:0.82rem; margin-bottom:12px; }
+.search-box:focus { outline:none; border-color:var(--accent); }
+
+.filter-bar { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+.filter-btn { padding:4px 12px; border:1px solid var(--border); border-radius:6px; font-size:0.72rem; cursor:pointer; background:var(--surface); color:var(--text2); font-weight:600; }
+.filter-btn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
+
+footer { text-align:center; padding:24px; color:var(--text3); font-size:0.72rem; border-top:1px solid var(--border); margin-top:16px; }
+footer a { color:var(--accent); text-decoration:none; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <h1>광양시</h1>
+    <div class="meta">
+      <span>전라 / 중소도시</span>
+      <span>인구 150,000명</span>
+      <span>소스: 이행실적</span>
+    </div>
+    <div class="stat-bar">
+      <div class="stat-pill"><span class="num">14</span>건 서비스</div>
+      <div class="stat-pill"><span class="num">6</span>건 AI (42.9%)</div>
+      <div class="stat-pill"><span class="num">14.3%</span> 완료율</div>
+      <div class="stat-pill">4-Ware <span class="num">1.8</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="nav-bar">
+  <div class="nav-inner">
+    <div><a href="과천시.html">&larr; 과천시</a></div>
+    <a href="../index.html">&#x1F3E0; 대시보드</a>
+    <div><a href="구리시.html">구리시 &rarr;</a></div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- 기본정보 + 4-Ware -->
+<div class="section">
+  <h2 class="section-title">기본 현황</h2>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">이행 현황</div>
+      <div class="grid-4" style="margin-bottom:12px;">
+        <div class="mini-stat"><div class="big" style="color:var(--accent);">14</div><div class="label">전체</div></div>
+        <div class="mini-stat"><div class="big" style="color:var(--green);">2</div><div class="label">완료</div></div>
+        <div class="mini-stat"><div class="big" style="color:var(--yellow);">6</div><div class="label">추진중</div></div>
+        <div class="mini-stat"><div class="big" style="color:var(--red);">6</div><div class="label">미추진</div></div>
+      </div>
+      <div style="height:24px;background:var(--surface2);border-radius:4px;overflow:hidden;display:flex;">
+        <div style="width:14.3%;background:var(--green);"></div>
+        <div style="width:42.9%;background:var(--yellow);"></div>
+        <div style="width:42.9%;background:var(--red);"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">4-Ware 성숙도</div>
+      <div class="ware-grid">
+        <div class="ware-item"><div class="score" style="color:var(--accent);">1</div><div class="wlabel">Hardware</div></div>
+        <div class="ware-item"><div class="score" style="color:var(--green);">3</div><div class="wlabel">Software</div></div>
+        <div class="ware-item"><div class="score" style="color:var(--yellow);">2</div><div class="wlabel">Human</div></div>
+        <div class="ware-item"><div class="score" style="color:var(--red);">1</div><div class="wlabel">Orgware</div></div>
+      </div>
+      <div style="text-align:center;font-size:0.82rem;color:var(--text2);">평균 <strong style="color:var(--accent);font-size:1.1rem;">1.8</strong> / 4.0</div>
+    </div>
+  </div>
+</div>
+
+<!-- 차트 -->
+<div class="section">
+  <h2 class="section-title">분야별 분포</h2>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">11개 법정 분야</div>
+      <div style="max-width:280px;margin:0 auto;"><canvas id="chartField"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">이행 상태</div>
+      <div style="max-width:280px;margin:0 auto;"><canvas id="chartStatus"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- 서비스 목록 -->
+<div class="section">
+  <h2 class="section-title">서비스 목록 (14건)</h2>
+  <div class="card">
+    <input type="text" class="search-box" id="searchInput" placeholder="서비스명, 분야, 상태로 검색...">
+    <div class="filter-bar" id="filterBar">
+      <button class="filter-btn active" data-filter="all">전체</button>
+      <button class="filter-btn" data-filter="ai">AI만</button>
+      <button class="filter-btn" data-filter="완료">완료</button>
+      <button class="filter-btn" data-filter="추진중">추진중</button>
+      <button class="filter-btn" data-filter="미추진">미추진</button>
+    </div>
+    <div class="tbl-wrap">
+      <table class="svc-table" id="svcTable">
+        <thead>
+          <tr>
+            <th>No</th><th>서비스명</th><th>분야</th><th>예산(백만)</th><th>이행률</th><th>상태</th><th>미추진 사유</th><th>비고</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+<td class="num-cell">1</td>
+<td class="svc-name">맞춤형 모바일앱 my광양 </td>
+<td><span class="tag-field">행정</span></td>
+<td class="num-cell">300</td>
+<td class="num-cell">100%</td>
+<td><span class="status-dot" style="background:#10b981"></span>완료</td>
+<td class="delay-cell"></td>
+<td class="note-cell">시민 통합행정플랫폼; 회원수 15,751명</td>
+</tr><tr>
+<td class="num-cell">2</td>
+<td class="svc-name">인공지능 민원챗봇 <span class="tag tag-ai">AI</span></td>
+<td><span class="tag-field">행정</span></td>
+<td class="num-cell">350</td>
+<td class="num-cell">-</td>
+<td><span class="status-dot" style="background:#ef4444"></span>미추진</td>
+<td class="delay-cell">스마트도시계획에 따라 연차별 진행</td>
+<td class="note-cell">AI/챗봇; '27년 구축·완료 예정</td>
+</tr><tr>
+<td class="num-cell">3</td>
+<td class="svc-name">빅데이터 플랫폼 (스마트행정 시각화 시스템) <span class="tag tag-ai">AI</span></td>
+<td><span class="tag-field">행정</span></td>
+<td class="num-cell">146</td>
+<td class="num-cell">70%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell"></td>
+<td class="note-cell">빅데이터; 구축기간 변경('25완료→'26완료); 사업비 변경(300→146)</td>
+</tr><tr>
+<td class="num-cell">4</td>
+<td class="svc-name">버스정보시스템 고도화 </td>
+<td><span class="tag-field">교통</span></td>
+<td class="num-cell">320</td>
+<td class="num-cell">100%</td>
+<td><span class="status-dot" style="background:#10b981"></span>완료</td>
+<td class="delay-cell"></td>
+<td class="note-cell">버스도착정보 수집율 60%→90% 향상; 사업비 변경(1,216→320)</td>
+</tr><tr>
+<td class="num-cell">5</td>
+<td class="svc-name">재활용선별시설 현대화 </td>
+<td><span class="tag-field">환경에너지수자원</span></td>
+<td class="num-cell">1,300</td>
+<td class="num-cell">-</td>
+<td><span class="status-dot" style="background:#ef4444"></span>미추진</td>
+<td class="delay-cell">스마트도시계획에 따라 연차별 진행</td>
+<td class="note-cell">'28년 구축·완료 예정</td>
+</tr><tr>
+<td class="num-cell">6</td>
+<td class="svc-name">CCTV 지능형 관제지원시스템 <span class="tag tag-ai">AI</span></td>
+<td><span class="tag-field">방범방재</span></td>
+<td class="num-cell">1,441</td>
+<td class="num-cell">20%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell"></td>
+<td class="note-cell">지능형 영상분석; 이상상황 탐지(배회·침입·유기·쓰러짐·싸움·방화); 사업비 변경(900→1,441); 1,600CH</td>
+</tr><tr>
+<td class="num-cell">7</td>
+<td class="svc-name">스마트 하수도 도시침수 대응시스템 <span class="tag tag-ai">AI</span></td>
+<td><span class="tag-field">환경에너지수자원</span></td>
+<td class="num-cell">8,569</td>
+<td class="num-cell">59%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell"></td>
+<td class="note-cell">예측 기반 침수대응; 하수관로 수위 모니터링; 실시간 침수모의 프로그램 개발 포함</td>
+</tr><tr>
+<td class="num-cell">8</td>
+<td class="svc-name">원격 저수지 관리 시스템 </td>
+<td><span class="tag-field">환경에너지수자원</span></td>
+<td class="num-cell">53</td>
+<td class="num-cell">-</td>
+<td><span class="status-dot" style="background:#ef4444"></span>미추진</td>
+<td class="delay-cell">사업비 확보에 따른 구축기간 변경</td>
+<td class="note-cell">사업비 변경(2,700→53); '28년 구축·완료 예정</td>
+</tr><tr>
+<td class="num-cell">9</td>
+<td class="svc-name">스마트 원격검침 시스템 </td>
+<td><span class="tag-field">환경에너지수자원</span></td>
+<td class="num-cell">2,920</td>
+<td class="num-cell">38%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell"></td>
+<td class="note-cell">IoT 통신 기반 원격검침; 사업비 변경(2,700→2,920); 설치율 53%(10,807/20,232전)</td>
+</tr><tr>
+<td class="num-cell">10</td>
+<td class="svc-name">공간정보 데이터베이스 고도화 </td>
+<td><span class="tag-field">시설물관리</span></td>
+<td class="num-cell">33</td>
+<td class="num-cell">20%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell"></td>
+<td class="note-cell">드론 항공촬영 기반 공간DB 갱신; 사업비 변경(34→33)</td>
+</tr><tr>
+<td class="num-cell">11</td>
+<td class="svc-name">AI 스마트아이키움플랫폼 <span class="tag tag-ai">AI</span></td>
+<td><span class="tag-field">교육</span></td>
+<td class="num-cell">760</td>
+<td class="num-cell">2%</td>
+<td><span class="status-dot" style="background:#f59e0b"></span>추진중</td>
+<td class="delay-cell"></td>
+<td class="note-cell">AI 교육격차 해소 플랫폼; MR스포츠 장비 37대; 구축기간 변경('25완료→'26완료); 사업비 변경(756→760)</td>
+</tr><tr>
+<td class="num-cell">12</td>
+<td class="svc-name">로봇을 활용한 무인 쉘터 <span class="tag tag-ai">AI</span></td>
+<td><span class="tag-field">보건의료복지</span></td>
+<td class="num-cell">680</td>
+<td class="num-cell">-</td>
+<td><span class="status-dot" style="background:#ef4444"></span>미추진</td>
+<td class="delay-cell">스마트도시계획에 따라 연차별 진행</td>
+<td class="note-cell">로봇 활용; '29년 구축·완료 예정</td>
+</tr><tr>
+<td class="num-cell">13</td>
+<td class="svc-name">스마트 공유 오피스 </td>
+<td><span class="tag-field">시설물관리</span></td>
+<td class="num-cell">14,410</td>
+<td class="num-cell">-</td>
+<td><span class="status-dot" style="background:#ef4444"></span>미추진</td>
+<td class="delay-cell">구축기간 변경('28구축→'26구축)</td>
+<td class="note-cell">사업비 변경(600→14,410); '26~'27 구축 예정</td>
+</tr><tr>
+<td class="num-cell">14</td>
+<td class="svc-name">스마트 공원 </td>
+<td><span class="tag-field">보건의료복지</span></td>
+<td class="num-cell">410</td>
+<td class="num-cell">-</td>
+<td><span class="status-dot" style="background:#ef4444"></span>미추진</td>
+<td class="delay-cell">스마트도시계획에 따라 연차별 진행</td>
+<td class="note-cell">'26년 구축·완료 예정</td>
+</tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div><!-- container -->
+
+<footer>
+  <a href="../index.html">&#x1F3E0; 대시보드로 돌아가기</a> |
+  데이터 기준일: 2026-03-04 | 광양시 상세 페이지
+</footer>
+
+<script>
+// Field chart
+new Chart(document.getElementById('chartField'), {
+  type:'doughnut',
+  data:{
+    labels:["행정", "교통", "보건의료복지", "환경에너지수자원", "방범방재", "시설물관리", "교육"],
+    datasets:[{ data:[3, 1, 2, 4, 1, 2, 1], backgroundColor:["#0891b2", "#06b6d4", "#14b8a6", "#10b981", "#f59e0b", "#f97316", "#ef4444"], borderWidth:2, borderColor:'#fff' }]
+  },
+  options:{ responsive:true, cutout:'50%', plugins:{ legend:{ position:'bottom', labels:{ font:{ size:10 }, padding:8 } } } }
+});
+
+// Status chart
+const statusData = [
+  2, 6, 6,
+  0
+];
+const statusLabels = ['완료','추진중','미추진','기타'];
+const statusColors = ['#10b981','#f59e0b','#ef4444','#94a3b8'];
+new Chart(document.getElementById('chartStatus'), {
+  type:'doughnut',
+  data:{
+    labels: statusLabels.filter((_,i) => statusData[i]>0),
+    datasets:[{ data: statusData.filter(v=>v>0), backgroundColor: statusColors.filter((_,i)=>statusData[i]>0), borderWidth:2, borderColor:'#fff' }]
+  },
+  options:{ responsive:true, cutout:'50%', plugins:{ legend:{ position:'bottom', labels:{ font:{ size:10 }, padding:8 } } } }
+});
+
+// Search & filter
+const searchInput = document.getElementById('searchInput');
+const table = document.getElementById('svcTable');
+const rows = table.querySelectorAll('tbody tr');
+const filterBtns = document.querySelectorAll('.filter-btn');
+let activeFilter = 'all';
+
+function applyFilters() {
+  const q = searchInput.value.toLowerCase();
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    const matchSearch = !q || text.includes(q);
+    let matchFilter = true;
+    if (activeFilter === 'ai') matchFilter = row.innerHTML.includes('tag-ai');
+    else if (activeFilter !== 'all') {
+      const statusCell = row.cells[5]?.textContent.trim();
+      matchFilter = statusCell === activeFilter;
+    }
+    row.style.display = (matchSearch && matchFilter) ? '' : 'none';
+  });
+}
+
+searchInput.addEventListener('input', applyFilters);
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    applyFilters();
+  });
+});
+</script>
+</body>
+</html>
