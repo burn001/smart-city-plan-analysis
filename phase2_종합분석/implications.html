@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>종합 시사점 보고서 — 지자체 스마트도시계획 분석</title>
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<style>
+  :root {
+    --bg: #f8fafc; --surface: #ffffff; --text: #1a202c; --text2: #475569; --text3: #94a3b8;
+    --accent: #0891b2; --accent-light: #ecfeff; --border: #e2e8f0;
+    --header-bg: #0f2b46; --green: #059669; --red: #dc2626; --purple: #7c3aed; --orange: #d97706;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Pretendard Variable',system-ui,sans-serif; background:var(--bg); color:var(--text); line-height:1.8; }
+
+  /* Header */
+  .header { background:linear-gradient(135deg,#0f2b46,#164e63); color:#fff; padding:48px 0 36px; }
+  .header-inner { max-width:820px; margin:0 auto; padding:0 32px; }
+  .header h1 { font-size:1.6rem; font-weight:800; margin-bottom:12px; }
+  .header .meta { display:flex; gap:20px; flex-wrap:wrap; font-size:0.82rem; color:#94a3b8; }
+  .header .meta span { display:flex; align-items:center; gap:4px; }
+  .back-link { display:inline-block; margin-bottom:16px; color:#38bdf8; text-decoration:none; font-size:0.82rem; font-weight:600; }
+  .back-link:hover { text-decoration:underline; }
+
+  /* Content */
+  .content { max-width:820px; margin:0 auto; padding:32px; }
+  .content h2 { font-size:1.25rem; font-weight:800; color:var(--header-bg); margin:48px 0 8px; padding-bottom:8px; border-bottom:2px solid var(--accent); }
+  .content h3 { font-size:1.05rem; font-weight:700; color:var(--text); margin:32px 0 8px; }
+  .content p { margin:12px 0; font-size:0.9rem; color:var(--text); }
+  .content strong { color:var(--header-bg); }
+  .content hr { border:none; border-top:1px solid var(--border); margin:36px 0; }
+  .content ul, .content ol { margin:12px 0 12px 24px; font-size:0.9rem; }
+  .content li { margin:6px 0; }
+
+  /* Blockquote */
+  .content blockquote {
+    background:var(--accent-light); border-left:4px solid var(--accent);
+    padding:16px 20px; margin:16px 0; border-radius:0 8px 8px 0;
+    font-size:0.85rem; color:#134e4a;
+  }
+
+  /* Tables */
+  .content table { width:100%; border-collapse:collapse; margin:16px 0; font-size:0.82rem; }
+  .content th { text-align:left; padding:10px 12px; font-weight:600; color:var(--text2); font-size:0.78rem; text-transform:uppercase; letter-spacing:0.03em; border-bottom:2px solid var(--border); background:#f1f5f9; }
+  .content td { padding:10px 12px; border-bottom:1px solid var(--border); }
+  .content tr:hover td { background:#f8fafc; }
+
+  /* Highlight boxes */
+  .case-box { background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:16px 20px; margin:16px 0; }
+  .case-box.good { background:#f0fdf4; border-color:#86efac; }
+  .case-box.warn { background:#fef2f2; border-color:#fca5a5; }
+  .case-box.info { background:var(--accent-light); border-color:#67e8f9; }
+  .case-title { font-size:0.82rem; font-weight:700; margin-bottom:8px; }
+  .case-box ul { margin:4px 0 0 20px; font-size:0.82rem; }
+
+  /* Section nav */
+  .toc { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:20px 24px; margin-bottom:32px; }
+  .toc-title { font-size:0.82rem; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:0.04em; margin-bottom:12px; }
+  .toc ol { margin:0 0 0 20px; font-size:0.85rem; }
+  .toc li { margin:4px 0; }
+  .toc a { color:var(--accent); text-decoration:none; font-weight:500; }
+  .toc a:hover { text-decoration:underline; }
+
+  /* Footer */
+  footer { text-align:center; padding:32px; color:var(--text3); font-size:0.75rem; border-top:1px solid var(--border); margin-top:48px; }
+  footer a { color:var(--accent); text-decoration:none; }
+
+  @media (max-width:640px) {
+    .header-inner, .content { padding:0 16px; }
+    .content h2 { font-size:1.1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <a class="back-link" href="../index.html">&larr; 대시보드로 돌아가기</a>
+    <h1>종합 시사점 보고서</h1>
+    <div class="meta">
+      <span>분석일: 2026-03-04</span>
+      <span>대상: 37개 지자체 955건</span>
+      <span>Phase 0~2 전수 분석 기반</span>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+
+<div class="toc">
+  <div class="toc-title">목차</div>
+  <ol>
+    <li><a href="#s1">Input to Outcome 전환: 투입과 성과의 괴리</a></li>
+    <li><a href="#s2">휴먼웨어/오그웨어 정량화: 보편적 기술-제도 격차</a></li>
+    <li><a href="#s3">AI 신뢰성 담보: 기술적 한계와 거버넌스 공백</a></li>
+    <li><a href="#s4">평가체계 설계 방향</a></li>
+    <li><a href="#s5">핵심 수치 요약</a></li>
+    <li><a href="#s6">연구 한계 및 향후 과제</a></li>
+  </ol>
+</div>
+
+<!-- Section 1 -->
+<h2 id="s1">1. Input to Outcome 전환: 투입과 성과의 괴리</h2>
+
+<h3>1.1 예산 투입이 서비스 성과를 보장하지 않는다</h3>
+<p>37개 지자체 분석에서 예산 규모와 이행률 사이에 명확한 비례 관계가 나타나지 않는다. 이는 스마트도시 정책이 '얼마나 투입했는가'에서 '무엇을 달성했는가'로 평가 패러다임을 전환해야 함을 시사한다.</p>
+
+<div class="case-box warn">
+  <div class="case-title">고투입-저성과 사례</div>
+  <ul>
+    <li><strong>경주시</strong>: 예산합계 100,507백만원(중소도시 최대)이나 완료율 4.8%(중소도시 최하위). 건당 예산 4,786백만원을 투입하고도 21건 중 1건만 완료.</li>
+    <li><strong>남원시</strong>: 예산합계 345,869백만원(소도시 최대, 스마트시티 챌린지 사업 포함)으로 건당 12,810백만원. AI 서비스 10건(37.0%)으로 기술 도입은 적극적이나, 미추진 7건.</li>
+  </ul>
+</div>
+
+<div class="case-box good">
+  <div class="case-title">저투입-고효율 사례</div>
+  <ul>
+    <li><strong>의왕시</strong>: 예산합계 5,737백만원(건당 637백만원)으로 소도시 중 하위권이나, AI 비율 44.4%(전체 2위), 4-Ware 평균 2.8(전체 공동 1위), 완료율 66.7%.</li>
+    <li><strong>구리시</strong>: 예산합계 8,958백만원, 8건 중 7건 완료(87.5%). 미추진 0건. 단, 4-Ware 1.0으로 성숙도는 최하위.</li>
+  </ul>
+</div>
+
+<div class="case-box info">
+  <div class="case-title">미추진이 오히려 긍정적 결과를 낳은 사례 (D05: 29건)</div>
+  <ul>
+    <li><strong>거제시</strong> "스마트관광 빅데이터 시스템": 한국관광데이터랩 등 기존 시스템으로 대체 — 중복 투자 회피</li>
+    <li><strong>과천시</strong> "돌봄 마켓 플랫폼": 경기도 '누구나돌봄' 광역 플랫폼으로 대체 — 효율적 역할 분담</li>
+    <li><strong>공주시</strong> "AI 객체인식 대형폐기물 처리": 단순 배출 신청형 앱으로 대체 — 현실적 대안 채택</li>
+  </ul>
+  <p style="margin-top:8px;font-size:0.82rem;">이 29건은 '실패'가 아닌 <strong>'적응적 전환'</strong>으로 구분하여 평가할 필요가 있다.</p>
+</div>
+
+<h3>1.2 예산은 4-Ware 성숙도를 예측하지 못한다</h3>
+<p>건당 예산이 높은 광역시(8,575백만원)의 4-Ware 평균은 2.25로, 건당 예산이 낮은 중소도시(1,930백만원)의 2.20과 거의 차이가 없다. 오히려 기술-제도 갭은 광역시(2.0)가 중소도시(1.17)보다 거의 2배 크다.</p>
+<p>이는 대규모 예산 투입이 하드웨어와 소프트웨어 수준은 높이지만, 전담인력(Humanware)과 거버넌스(Orgware) 구축에는 자동으로 연결되지 않음을 보여준다.</p>
+
+<hr>
+
+<!-- Section 2 -->
+<h2 id="s2">2. 휴먼웨어/오그웨어 정량화: 보편적 기술-제도 격차</h2>
+
+<h3>2.1 1.09점 격차의 구조적 의미</h3>
+<p>37개 지자체 전체에서 기술 인프라(HW/SW) 평균 2.55 대비 조직·제도(Human/Org) 평균 1.46으로, <strong>1.09점의 격차</strong>가 존재한다. 이 격차는 86%(32개 도시)에서 관찰되며, 기술이 조직보다 뒤처진 도시는 0개이다.</p>
+
+<h3>2.2 제도적 공백의 실증</h3>
+
+<div class="case-box warn">
+  <div class="case-title">CAIO(Chief AI Officer) / AI 윤리 프레임워크: 0개 도시</div>
+  <p style="font-size:0.82rem;">37개 지자체 중 AI 서비스를 실운영하는 도시가 34개임에도, CAIO나 데이터전문관을 배치한 도시는 단 한 곳도 없다. AI 윤리 가이드라인이나 데이터 거버넌스 규정 보유 도시도 전무하다.</p>
+</div>
+
+<p><strong>전담부서(Humanware=2)와 이행률의 상관:</strong></p>
+<p>스마트도시 전담부서가 확인된 도시는 24개이다. 주요 특징:</p>
+<ul>
+  <li>부천시(스마트도시과): AI 10건, 4-Ware 2.0</li>
+  <li>수원시(스마트도시과): AI 8건, 4-Ware 2.0</li>
+  <li>진주시(스마트도시과): AI 5건, 리빙랩 운영, 4-Ware 2.2</li>
+  <li>구미시(미래도시전략과): AI 4건, 리빙랩 운영, 4-Ware 2.8 (전체 1위)</li>
+</ul>
+
+<h3>2.3 횡성군 사례: 오그웨어 실패의 전형</h3>
+<p>횡성군은 25건 전량 미추진이라는 극단적 사례를 보여준다. 원인은 <strong>스마트도시계획 승인 지연과 조례 제정 지연</strong>이다.</p>
+<ul>
+  <li>25건 모두 "조례제정 지연" 또는 "스마트도시계획 승인 지연" 사유</li>
+  <li>4-Ware: HW 3, SW 3, Human 1, <strong>Org 2</strong> — 기술은 중상위이나 Humanware 1점이 병목</li>
+  <li>D04(제도·조례 미비) 27건 중 가장 극단적 사례</li>
+</ul>
+
+<h3>2.4 인프라-조직 역량 불균형</h3>
+<p>대도시 6개 지자체의 만명당 인프라 밀도는 157.7개로 전 유형 최고이다. 그러나 인프라 밀도와 조직·제도 역량은 비례하지 않는다:</p>
+<ul>
+  <li>대도시: 인프라 157.7/만명이나 4-Ware 평균 2.08, 기술-제도 갭 1.00</li>
+  <li>광역: 인프라 105.0/만명이나 기술-제도 갭 <strong>2.00</strong> (최대)</li>
+  <li>농어촌: 인프라 86.3/만명이나 AI 비율 9.2%(최하위)</li>
+</ul>
+
+<hr>
+
+<!-- Section 3 -->
+<h2 id="s3">3. AI 신뢰성 담보: 기술적 한계와 거버넌스 공백</h2>
+
+<h3>3.1 기술적 한계(D02) 사례의 경고</h3>
+<p>미추진 사유 중 D02(기술적 한계)는 4건(1.8%)으로 가장 적지만, 그 내용은 가장 심각하다:</p>
+<ol>
+  <li><strong>과천시 "맞춤형 정보제공 서비스"</strong>: 영상분석시스템의 잦은 오보(false alarm) 및 데이터 제공 오류</li>
+  <li><strong>과천시 "드론 기반 안심 귀갓길 서비스"</strong>: 드론 자율운행 안정성 확보 필요</li>
+  <li><strong>거제시 "IoT 야외 체육기구"</strong>: 고장률 높고 AS 어려움</li>
+  <li><strong>울산광역시 "모바일 투표 플랫폼"</strong>: 블록체인 기술 미보편화</li>
+</ol>
+
+<h3>3.2 역U자형 AI 도입 패턴</h3>
+<table>
+  <thead><tr><th>유형</th><th>평균 AI 비율</th></tr></thead>
+  <tbody>
+    <tr><td>중소도시</td><td><strong>28.5%</strong></td></tr>
+    <tr><td>소도시</td><td>24.9%</td></tr>
+    <tr><td>광역</td><td>20.8%</td></tr>
+    <tr><td>대도시</td><td>14.9%</td></tr>
+    <tr><td>농어촌</td><td>9.2%</td></tr>
+  </tbody>
+</table>
+<p>중소도시가 AI 도입을 선도하고, 광역시·대도시는 레거시 서비스 비중으로 희석되어 오히려 하위권이다.</p>
+
+<h3>3.3 AI 워싱(AI Washing) 위험</h3>
+<p>2단계 AI 필터링에서:</p>
+<ul>
+  <li>Stage 1 키워드 매칭: 181건 (ai_keyword=Y)</li>
+  <li>Stage 2 맥락 검증 후 실AI: 169건 (ai_real=Y)</li>
+  <li><strong>과대평가 48건</strong>: IoT 센서 기반(24건), AI 기술 미확인(13건), 빅데이터 수집만(8건) 등</li>
+  <li><strong>과소평가 11건</strong>: 지능형(AI) 기술 적용 확인</li>
+</ul>
+
+<div class="case-box">
+  <div class="case-title">AI 워싱의 구체적 패턴</div>
+  <ul>
+    <li>"IoT 센서 기반 원격검침" → AI 아님 (단순 데이터 수집)</li>
+    <li>"IoT 미세먼지 측정 신호등" → AI 아님 (센서 기반 자동화)</li>
+    <li>"빅데이터 수집·저장" → AI 아님 (분석/예측 없이 수집만)</li>
+    <li>"스마트 그늘막" → AI 아님 (IoT 센서 + 태양광)</li>
+  </ul>
+</div>
+
+<p>실제 AI 169건의 기술 유형: 지능형 CCTV/영상분석(최다), 챗봇/LLM(8건), 자율주행/항행(8건), 디지털트윈(7건). <strong>지능형 CCTV 단일 기술 편중</strong>이 취약점이다.</p>
+
+<hr>
+
+<!-- Section 4 -->
+<h2 id="s4">4. 평가체계 설계 방향</h2>
+
+<h3>4.1 규모별 차별화 평가의 유효성</h3>
+<table>
+  <thead><tr><th>지표</th><th>유형 간 변이</th><th>유효성</th></tr></thead>
+  <tbody>
+    <tr><td>평균 사업수</td><td>16.3~73.5건</td><td>높음 (4.5배 차이)</td></tr>
+    <tr><td>AI 비율</td><td>9.2~28.5%</td><td>높음 (역U자형 패턴)</td></tr>
+    <tr><td>4-Ware 평균</td><td>1.85~2.25</td><td>보통 (21% 차이)</td></tr>
+    <tr><td>기술-제도 갭</td><td>0.83~2.00</td><td>높음 (2.4배 차이)</td></tr>
+    <tr><td>만명당 인프라</td><td>30.6~157.7개</td><td>매우 높음 (약 5배 차이)</td></tr>
+    <tr><td>분야 HHI</td><td>0.179~0.344</td><td>높음 (1.9배 차이)</td></tr>
+  </tbody>
+</table>
+
+<h3>4.2 핵심 평가 지표 제안</h3>
+
+<div class="case-box info">
+  <div class="case-title">가. HHI 집중도 지수 (분야 다양성)</div>
+  <p style="font-size:0.82rem;">HHI = &sum;(share<sub>i</sub><sup>2</sup>)로 11개 분야 분포의 균등 정도를 측정. 완전균등 0.091, 단일분야 1.0. 전체 평균 0.255. 사업수 극소(고령군 1건, HHI=1.0) 시 왜곡 주의.</p>
+</div>
+
+<div class="case-box info">
+  <div class="case-title">나. 4-Ware 균형 점수 (성숙도 균형)</div>
+  <p style="font-size:0.82rem;">max(HW,SW,Human,Org) - min(HW,SW,Human,Org). 갭이 작을수록 균형. 전체 평균 갭 1.09점. 광역 2.00, 대도시 1.00, 중소도시 1.17, 소도시 1.14, 농어촌 0.83.</p>
+</div>
+
+<div class="case-box info">
+  <div class="case-title">다. AI 실질 비율 (기술 선진성)</div>
+  <p style="font-size:0.82rem;">ai_real(2단계 검증) 기반 비율만 평가에 활용. ai_keyword(181건) vs ai_real(169건) → 12건 괴리. ai_flag 기준 시 48건 과대평가.</p>
+</div>
+
+<div class="case-box info">
+  <div class="case-title">라. 인프라 밀도 (인구 대비)</div>
+  <p style="font-size:0.82rem;">절대량이 아닌 만명당 인프라 밀도. 절대량: 대구(36,652) > 수원(30,312). 만명당: 거제(325.4) > 화성(263.9) > 안양(262.0).</p>
+</div>
+
+<div class="case-box info">
+  <div class="case-title">마. 적응적 이행률 (D05 보정)</div>
+  <p style="font-size:0.82rem;">D05(대체 서비스) 29건을 분모에서 제외. 기존 31.2% → 적응적 32.8%. 진정한 이행 부진에 정책 역량 집중.</p>
+</div>
+
+<hr>
+
+<!-- Section 5 -->
+<h2 id="s5">5. 핵심 수치 요약</h2>
+
+<h3>5.1 전체 현황</h3>
+<table>
+  <thead><tr><th>항목</th><th>수치</th></tr></thead>
+  <tbody>
+    <tr><td>분석 대상 지자체</td><td>37개</td></tr>
+    <tr><td>전체 서비스 건수</td><td><strong>955건</strong></td></tr>
+    <tr><td>&nbsp;&nbsp;- 이행실적 기반</td><td>624건 (32개 도시)</td></tr>
+    <tr><td>&nbsp;&nbsp;- 인증 기반</td><td>331건 (5개 도시)</td></tr>
+    <tr><td>도시유형</td><td>광역 2, 대도시 6, 중소도시 9, 소도시 11, 농어촌 9</td></tr>
+  </tbody>
+</table>
+
+<h3>5.2 분야별 분포 (상위 5)</h3>
+<table>
+  <thead><tr><th>순위</th><th>분야</th><th>건수</th><th>비율</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>교통 (F02)</td><td>195</td><td>20.4%</td></tr>
+    <tr><td>2</td><td>행정 (F01)</td><td>188</td><td>19.7%</td></tr>
+    <tr><td>3</td><td>환경에너지수자원 (F04)</td><td>124</td><td>13.0%</td></tr>
+    <tr><td>4</td><td>방범방재 (F05)</td><td>110</td><td>11.5%</td></tr>
+    <tr><td>5</td><td>문화관광스포츠 (F08)</td><td>100</td><td>10.5%</td></tr>
+  </tbody>
+</table>
+<p>3대 유형: 대화행정형 391건(40.9%), 생명안전형 329건(34.5%), 물리제어형 235건(24.6%)</p>
+
+<h3>5.3 AI 서비스</h3>
+<table>
+  <thead><tr><th>항목</th><th>수치</th></tr></thead>
+  <tbody>
+    <tr><td>AI 키워드 매칭(Stage 1)</td><td>181건</td></tr>
+    <tr><td>AI 실서비스(Stage 2)</td><td><strong>169건 (17.7%)</strong></td></tr>
+    <tr><td>이행실적 AI</td><td>144건 / 624건 = <strong>23.1%</strong></td></tr>
+    <tr><td>인증 AI</td><td>25건 / 331건 = <strong>7.6%</strong></td></tr>
+    <tr><td>과대평가(ai_flag O → ai_real N)</td><td>48건</td></tr>
+    <tr><td>과소평가(ai_flag 미표기 → ai_real Y)</td><td>11건</td></tr>
+    <tr><td>AI 0건 도시</td><td>3개 (고령군, 산청군, 홍천군)</td></tr>
+    <tr><td>AI 비율 최고 도시</td><td>여수시 55.6%</td></tr>
+  </tbody>
+</table>
+
+<h3>5.4 이행률 (이행실적 32개 도시 624건)</h3>
+<table>
+  <thead><tr><th>항목</th><th>건수</th><th>비율</th></tr></thead>
+  <tbody>
+    <tr><td>완료</td><td>195</td><td><strong>31.2%</strong></td></tr>
+    <tr><td>추진중</td><td>206</td><td>33.0%</td></tr>
+    <tr><td>미추진</td><td>220</td><td><strong>35.3%</strong></td></tr>
+    <tr><td>혼합</td><td>3</td><td>0.5%</td></tr>
+  </tbody>
+</table>
+
+<h3>5.5 미추진 사유 (220건)</h3>
+<table>
+  <thead><tr><th>코드</th><th>사유</th><th>건수</th><th>비율</th></tr></thead>
+  <tbody>
+    <tr><td>D06</td><td>사업 재검토/변경</td><td>82</td><td><strong>37.3%</strong></td></tr>
+    <tr><td>D01</td><td>예산 미확보/공모 탈락</td><td>44</td><td><strong>20.0%</strong></td></tr>
+    <tr><td>D05</td><td>수요 부족/대체 서비스</td><td>29</td><td>13.2%</td></tr>
+    <tr><td>D04</td><td>제도·조례 미비</td><td>27</td><td>12.3%</td></tr>
+    <tr><td>D07</td><td>기타</td><td>19</td><td>8.6%</td></tr>
+    <tr><td>D03</td><td>외부 인프라/연계 지연</td><td>15</td><td>6.8%</td></tr>
+    <tr><td>D02</td><td>기술적 한계</td><td>4</td><td>1.8%</td></tr>
+  </tbody>
+</table>
+
+<h3>5.6 4-Ware 성숙도 (37개 도시 평균)</h3>
+<table>
+  <thead><tr><th>Ware</th><th>평균 점수</th><th>단계 해석</th></tr></thead>
+  <tbody>
+    <tr><td>SW (Software)</td><td>2.62</td><td>연계기~고도화기</td></tr>
+    <tr><td>HW (Hardware)</td><td>2.49</td><td>연계기</td></tr>
+    <tr><td>Human (Humanware)</td><td>1.65</td><td>도입기~연계기</td></tr>
+    <tr><td>Org (Orgware)</td><td>1.27</td><td>도입기</td></tr>
+    <tr style="background:#f0fdfa;"><td><strong>기술(HW+SW) 평균</strong></td><td><strong>2.55</strong></td><td></td></tr>
+    <tr style="background:#fef2f2;"><td><strong>제도(Human+Org) 평균</strong></td><td><strong>1.46</strong></td><td></td></tr>
+    <tr style="background:#fffbeb;"><td><strong>기술-제도 갭</strong></td><td><strong>1.09</strong></td><td></td></tr>
+  </tbody>
+</table>
+<p>기술 > 제도: 32개 도시 (86%) | 자율기(4단계) 도달 도시: 0개</p>
+
+<h3>5.7 규모별 핵심 지표</h3>
+<table>
+  <thead><tr><th>유형</th><th>평균사업</th><th>AI비율</th><th>완료율</th><th>4-Ware</th><th>기술-제도갭</th><th>만명당인프라</th></tr></thead>
+  <tbody>
+    <tr><td>광역</td><td>73.5</td><td>20.8%</td><td>41.7%</td><td>2.25</td><td>2.00</td><td>105.0</td></tr>
+    <tr><td>대도시</td><td>46.0</td><td>14.9%</td><td>33.5%</td><td>2.08</td><td>1.00</td><td>157.7</td></tr>
+    <tr><td>중소도시</td><td>20.1</td><td>28.5%</td><td>26.5%</td><td>2.20</td><td>1.17</td><td>91.7</td></tr>
+    <tr><td>소도시</td><td>18.5</td><td>24.9%</td><td>41.0%</td><td>1.85</td><td>1.14</td><td>30.6</td></tr>
+    <tr><td>농어촌</td><td>16.3</td><td>9.2%</td><td>40.4%</td><td>1.92</td><td>0.83</td><td>86.3</td></tr>
+  </tbody>
+</table>
+
+<hr>
+
+<!-- Section 6 -->
+<h2 id="s6">6. 연구 한계 및 향후 과제</h2>
+
+<h3>6.1 데이터 한계</h3>
+<ol>
+  <li><strong>이행실적-인증 교차분석 불가</strong>: 이행실적 32개 도시와 인증 5개 도시의 지자체가 달라 동일 도시에 대한 비교 불가능.</li>
+  <li><strong>인증 도시의 이행상태 미보유</strong>: 대구, 수원, 안양, 부천, 화성 5개 도시는 이행률 분석에서 제외.</li>
+  <li><strong>인프라 데이터 보정</strong>: 초기 추출에서 16개 도시가 0건이었으나, v3 보정으로 1개 도시(산청군)로 감소.</li>
+  <li><strong>해남군 1건 불일치</strong>: 메타데이터 33건 vs 실제 번호 부여 32건.</li>
+</ol>
+
+<h3>6.2 방법론 한계</h3>
+<ol>
+  <li><strong>4-Ware 채점의 주관성</strong>: PDF 텍스트 기반 추정으로 현장 실사 대비 정밀도 제한적.</li>
+  <li><strong>AI 분류의 경계</strong>: IoT+분석, 빅데이터+시각화 등 기술 경계 모호.</li>
+  <li><strong>예산 데이터의 이질성</strong>: 총사업비 vs 연간 집행액 기준 혼재.</li>
+</ol>
+
+<h3>6.3 향후 과제</h3>
+<ol>
+  <li><strong>종단적 추적</strong>: 2026년 이후 이행실적 변화 추적을 통해 미추진 사업의 전환율 분석.</li>
+  <li><strong>현장 검증</strong>: 4-Ware 채점의 현장 실사 기반 보정.</li>
+  <li><strong>시민 만족도 연계</strong>: 서비스 운영 건수뿐 아니라 시민 체감 성과 측정.</li>
+  <li><strong>AI 품질 지표 개발</strong>: 정확도, 오보율, 시민 신뢰도 등 품질 지표 개발.</li>
+</ol>
+
+</div>
+
+<footer>
+  <p>분석일: 2026-03-04 | 37개 지자체 955건 서비스 전수 분석 기반</p>
+  <p style="margin-top:4px;"><a href="../index.html">대시보드로 돌아가기</a></p>
+</footer>
+
+</body>
+</html>
