@@ -33,7 +33,8 @@
 
   /* Section */
   .section { margin-bottom:32px; }
-  .section-title { font-size:1.15rem; font-weight:700; color:var(--header-bg); margin-bottom:16px; padding-left:12px; border-left:4px solid var(--accent); }
+  .section-title { font-size:1.15rem; font-weight:700; color:var(--header-bg); margin-bottom:4px; padding-left:12px; border-left:4px solid var(--accent); }
+  .section-desc { font-size:0.82rem; color:var(--text2); margin-bottom:16px; padding-left:16px; }
 
   /* Cards */
   .card { background:var(--surface); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow); border:1px solid var(--border); }
@@ -126,6 +127,7 @@
 <!-- SECTION 1: 전체 현황 -->
 <div class="section">
   <h2 class="section-title">전체 현황</h2>
+  <p class="section-desc">37개 지자체의 스마트도시 서비스 955건을 11개 법정 분야 및 3대 유형으로 분류한 종합 현황</p>
   <div class="grid-4" style="margin-bottom:20px;">
     <div class="card mini-stat">
       <div class="big" style="color:var(--accent);">955</div>
@@ -168,6 +170,7 @@
 <!-- SECTION 2: AI 서비스 현황 -->
 <div class="section">
   <h2 class="section-title">AI 서비스 현황</h2>
+  <p class="section-desc">이행실적과 인증 자료에서 식별된 AI 기반 서비스의 도입 현황 및 지자체별 비율 비교</p>
   <div class="grid-2" style="margin-bottom:20px;">
     <div class="card mini-stat">
       <div class="big" style="color:var(--accent);">23.1%</div>
@@ -184,11 +187,17 @@
     <div class="card-title">지자체별 AI 서비스 비율 (상위 15)</div>
     <div class="chart-wrap"><canvas id="chartAI"></canvas></div>
   </div>
+  <div class="highlight-box" style="margin-top:16px;">
+    <p><strong>AI 서비스 판별 기준 (2단계 필터링)</strong></p>
+    <p><strong>Stage 1 — 키워드 매칭</strong>: 서비스 설명에 AI·인공지능·딥러닝·머신러닝·지능형·자율주행·챗봇·LLM·디지털트윈 등 AI 관련 키워드 포함 여부 확인 → 181건 후보</p>
+    <p><strong>Stage 2 — 맥락 검증</strong>: 키워드 매칭 결과를 서비스 내용 기반으로 재검증. 단순 IoT 센서(24건), 빅데이터 수집만(8건), AI 기술 미확인(13건) 등 <strong>과대평가 48건 제외</strong>, 키워드 미매칭이나 실제 AI 적용 확인된 <strong>과소평가 11건 추가</strong> → 최종 <strong>169건</strong> 확정</p>
+  </div>
 </div>
 
 <!-- SECTION 3: 이행률 현황 -->
 <div class="section">
   <h2 class="section-title">이행률 현황 (이행실적 32개 도시)</h2>
+  <p class="section-desc">스마트도시계획 대비 실제 추진 현황 — 완료·추진중·미추진 분포와 미추진 사유 분석</p>
   <div class="grid-2">
     <div class="card">
       <div class="card-title">지자체별 이행 현황</div>
@@ -209,6 +218,7 @@
 <!-- SECTION 4: 4-Ware 성숙도 -->
 <div class="section">
   <h2 class="section-title">4-Ware 성숙도</h2>
+  <p class="section-desc">Hardware·Software·Humanware·Orgware 4개 축으로 평가한 스마트도시 성숙도와 기술-제도 간 격차</p>
   <div class="grid-2">
     <div class="card">
       <div class="card-title">5개 도시유형별 4-Ware 점수 (4점 만점)</div>
@@ -270,6 +280,7 @@
 <!-- SECTION 5: 지리 시각화 -->
 <div class="section">
   <h2 class="section-title">지리 시각화</h2>
+  <p class="section-desc">전국 37개 지자체의 공간 분포, 인프라 밀도, 도시유형별 특성을 시각화한 인터랙티브 지도</p>
   <div class="geo-links">
     <a class="geo-link" href="geo/bubble_map.html" target="_blank">
       <div class="icon">&#x1F5FA;</div>
@@ -292,6 +303,7 @@
 <!-- SECTION 6: 규모별 비교 -->
 <div class="section">
   <h2 class="section-title">규모별 비교 (5개 도시유형)</h2>
+  <p class="section-desc">광역·대도시·중소도시·소도시·농어촌 5개 유형별 핵심 지표 비교 — AI 비율, 이행률, 성숙도, 집중도(HHI)</p>
   <div class="card" style="overflow-x:auto;">
     <table class="data-table">
       <thead>
@@ -316,7 +328,7 @@
           <td class="num-cell">41.7%</td>
           <td class="num-cell">2.25</td>
           <td class="num-cell" style="color:var(--red);font-weight:700;">2.00</td>
-          <td class="num-cell">0.4</td>
+          <td class="num-cell">105.0</td>
           <td class="num-cell">0.179</td>
         </tr>
         <tr>
@@ -327,7 +339,7 @@
           <td class="num-cell">33.5%</td>
           <td class="num-cell">2.08</td>
           <td class="num-cell">1.00</td>
-          <td class="num-cell">1.4</td>
+          <td class="num-cell">157.7</td>
           <td class="num-cell">0.255</td>
         </tr>
         <tr>
@@ -338,7 +350,7 @@
           <td class="num-cell">26.5%</td>
           <td class="num-cell">2.20</td>
           <td class="num-cell">1.17</td>
-          <td class="num-cell">1.5</td>
+          <td class="num-cell">91.7</td>
           <td class="num-cell">0.187</td>
         </tr>
         <tr>
@@ -349,7 +361,7 @@
           <td class="num-cell">41.0%</td>
           <td class="num-cell">1.85</td>
           <td class="num-cell">1.14</td>
-          <td class="num-cell">3.7</td>
+          <td class="num-cell">30.6</td>
           <td class="num-cell">0.197</td>
         </tr>
         <tr>
@@ -360,7 +372,7 @@
           <td class="num-cell">40.4%</td>
           <td class="num-cell">1.92</td>
           <td class="num-cell" style="color:var(--green);">0.83</td>
-          <td class="num-cell" style="font-weight:700;">6.0</td>
+          <td class="num-cell" style="font-weight:700;">86.3</td>
           <td class="num-cell" style="color:var(--red);">0.344</td>
         </tr>
       </tbody>
@@ -376,6 +388,7 @@
 <!-- SECTION 7: 도시별 상세 -->
 <div class="section">
   <h2 class="section-title">도시별 상세 (37개 지자체)</h2>
+  <p class="section-desc">지자체별 서비스 목록, 분야 분포, AI 비율, 이행 현황을 확인할 수 있는 개별 상세 페이지</p>
   <div class="card">
     <input type="text" id="citySearch" placeholder="도시명으로 검색..." style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.85rem;margin-bottom:16px;">
     <div id="cityGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;">
